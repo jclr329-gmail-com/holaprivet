@@ -1,7 +1,7 @@
 {
     "name": "holaprivet/curso",
     "type": "project",
-    "description": "holaprivet.com — Curso de espanol para rusohablantes",
+    "description": "holaprivet.com - Curso de espanol para rusohablantes",
     "license": "proprietary",
     "require": {
         "php": "^8.3",
@@ -13,12 +13,6 @@
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         }
-    },
-    "scripts": {
-        "post-autoload-dump": [
-            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
-        ]
     },
     "config": {
         "optimize-autoloader": true,
