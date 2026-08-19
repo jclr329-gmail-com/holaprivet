@@ -1,0 +1,30 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Cabeceras de autorizacion
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirigir barras finales si no es carpeta
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Enviar todo lo demas al front controller
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# --- Proteccion de archivos y carpetas sensibles ---------------------------
+<FilesMatch "^\.env|^\.env\..*|^composer\.(json|lock)$|^artisan$|^package\.json$">
+    Require all denied
+</FilesMatch>
+
+RedirectMatch 404 /\.git
+RedirectMatch 404 /app/
+RedirectMatch 404 /\.tools/
