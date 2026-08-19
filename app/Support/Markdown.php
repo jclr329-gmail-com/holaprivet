@@ -119,8 +119,12 @@ class Markdown
             $html .= '<tr>';
 
             foreach ($celdas as $c => $celda) {
-                // Primera columna: es el espanol. Se marca como audible.
-                $contenido = ($etiqueta === 'td' && $c === 0)
+                // Primera columna: normalmente es el espanol y se marca
+                // audible entera. Pero hay tablas cuya primera columna es rusa
+                // («паспорт») o mixta («**es** aburrido — он скучный»): ahi se
+                // procesa como texto normal y solo suena la negrita latina.
+                $contenido = ($etiqueta === 'td' && $c === 0
+                              && ! preg_match('/\p{Cyrillic}/u', $celda))
                     ? $this->marcarEspanol($celda)
                     : $this->enLinea($celda);
                 $html .= "<{$etiqueta}>{$contenido}</{$etiqueta}>";
@@ -157,17 +161,34 @@ class Markdown
         while ($i < $n) {
             $t = trim($lineas[$i]);
 
-            if ($t === '') { $i++; continue; }
+            if ($t === '') {
+                // Una linea en blanco solo continua la lista si lo que viene
+                // despues es otro punto. Si viene un parrafo, la lista se
+                // cierra aqui: sin esta mirada hacia delante, el parrafo
+                // siguiente acababa DENTRO del ultimo punto.
+                $j = $i + 1;
+                while ($j < $n && trim($lineas[$j]) === '') {
+                    $j++;
+                }
+                if ($j < $n && preg_match($patron, trim($lineas[$j]))) {
+                    $i = $j;
+                    continue;
+                }
+                break;
+            }
 
             if (preg_match($patron, $t, $m)) {
-                $items[] = $this->enLinea($m[1]);
+                $items[] = $m[1];
                 $i++;
                 continue;
             }
 
-            // Continuacion de la linea anterior
+            // Continuacion del punto anterior: se acumula EN CRUDO y el
+            // Markdown se procesa al final, una sola vez por punto. Si cada
+            // linea se procesara por separado, la negrita que cruza el salto
+            // saldria con los asteriscos sin cerrar.
             if ($items && ! $this->esEspecial($t)) {
-                $items[count($items) - 1] .= ' ' . $this->enLinea($t);
+                $items[count($items) - 1] .= ' ' . $t;
                 $i++;
                 continue;
             }
@@ -180,7 +201,7 @@ class Markdown
         $html     = "<{$etiqueta}{$clase}>";
 
         foreach ($items as $it) {
-            $html .= "<li>{$it}</li>";
+            $html .= '<li>' . $this->enLinea($it) . '</li>';
         }
 
         return [$html . "</{$etiqueta}>", $i];
@@ -192,9 +213,14 @@ class Markdown
     {
         $t = e($t);
 
-        // Negrita: en este curso, casi siempre es el espanol que se explica
+        // Negrita: solo el ESPANOL se marca como audible. La negrita rusa
+        // —«**не нужно учить**», «**три разных глагола**»— es enfasis normal
+        // y va en <strong>: si llevara la clase .es, saldria con el punteado
+        // de audio y seria pulsable sin tener nada que sonar.
         $t = preg_replace_callback('/\*\*(.+?)\*\*/u', function ($m) {
-            return $this->audio
+            $esEspanol = ! preg_match('/\p{Cyrillic}/u', $m[1])
+                         && preg_match('/\p{Latin}/u', $m[1]);
+            return ($this->audio && $esEspanol)
                 ? '<span class="es">' . $m[1] . '</span>'
                 : '<strong>' . $m[1] . '</strong>';
         }, $t);
@@ -203,10 +229,15 @@ class Markdown
         $t = preg_replace('/`(.+?)`/u', '<code>$1</code>', $t);
         $t = preg_replace('/\[(.+?)\]\((.+?)\)/u', '<a href="$2">$1</a>', $t);
 
-        // Marcas de correccion propias del curso
-        $t = preg_replace('/Неправильно:\s*(.+?)\s*→/u',
-                          'Неправильно: <span class="mal">$1</span> →', $t);
-        $t = preg_replace('/Правильно:\s*(.+)$/u',
+        // Marcas de correccion propias del curso.
+        //
+        // La forma marcada es la ESPANOLA; la marca termina donde empieza el
+        // ruso, un « — » separador o una nota *(N1-02)*. Sin ese freno, el
+        // verde/rojo se comeria tambien la explicacion entera del parrafo.
+        $freno = '(?=\s+[—–]\s|\s[\p{Cyrillic}«]|\s*<em>\(|\s*→|$)';
+        $t = preg_replace('/Неправильно:\s*((?:(?!Правильно:)[^→])+?)' . $freno . '/u',
+                          'Неправильно: <span class="mal">$1</span>', $t);
+        $t = preg_replace('/Правильно:\s*((?:(?!Неправильно:).)+?)' . $freno . '/u',
                           'Правильно: <span class="bien">$1</span>', $t);
 
         return $t;

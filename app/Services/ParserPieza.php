@@ -400,8 +400,24 @@ class ParserPieza
             return [];
         }
 
-        $salida = [];
+        // Una frase larga puede partirse en dos lineas en el archivo. Antes
+        // de leer los numeros hay que pegar cada continuacion a su frase; si
+        // no, la cola se pierde y quedan asteriscos sin cerrar.
+        $items = [];
         foreach (explode("\n", $s['body_md']) as $l) {
+            $l = trim($l);
+            if ($l === '' || $l === '---') {
+                continue;
+            }
+            if (preg_match('/^\d+\.\s/u', $l)) {
+                $items[] = $l;
+            } elseif ($items) {
+                $items[count($items) - 1] .= ' ' . $l;
+            }
+        }
+
+        $salida = [];
+        foreach ($items as $l) {
             if (! preg_match('/^\s*(\d+)\.\s+(.+)$/u', trim($l), $m)) {
                 continue;
             }
@@ -423,10 +439,18 @@ class ParserPieza
 
     protected function partirBilingue(string $t): array
     {
-        foreach ([' — ', ' – '] as $sep) {
-            if (str_contains($t, $sep)) {
-                [$a, $b] = explode($sep, $t, 2);
-                return [$this->limpiarMd($a), $this->limpiarMd($b)];
+        // El separador es el primer guion largo que queda FUERA de la
+        // negrita. En las frases-dialogo el guion forma parte de la frase:
+        //     **¿Algo más? — No, nada más.** — Что-нибудь ещё? — Нет.
+        // El primer « — » esta dentro de los asteriscos y no separa nada;
+        // separa el primero que deja un numero PAR de «**» a su izquierda.
+        if (preg_match_all('/\s[—–]\s/u', $t, $m, PREG_OFFSET_CAPTURE)) {
+            foreach ($m[0] as $hit) {
+                if (substr_count(substr($t, 0, $hit[1]), '**') % 2 === 0) {
+                    $a = substr($t, 0, $hit[1]);
+                    $b = substr($t, $hit[1] + strlen($hit[0]));
+                    return [$this->limpiarMd($a), $this->limpiarMd($b)];
+                }
             }
         }
         return [$this->limpiarMd($t), ''];
@@ -609,25 +633,36 @@ class ParserPieza
             return [];
         }
 
+        // Los enlaces largos parten de linea en el archivo: la continuacion
+        // se pega a su punto para no perder media descripcion.
+        $items = [];
+        foreach (explode("\n", $s['body_md']) as $l) {
+            $l = trim($l);
+            if ($l === '' || $l === '---') {
+                continue;
+            }
+            if (str_starts_with($l, '-')) {
+                $items[] = ltrim($l, "- \t");
+            } elseif ($items) {
+                $items[count($items) - 1] .= ' ' . $l;
+            }
+        }
+
         $salida   = [];
         $posicion = 0;
 
-        foreach (explode("\n", $s['body_md']) as $l) {
-            $t = trim($l);
-            if (! str_starts_with($t, '-')) {
-                continue;
-            }
-
-            $t = ltrim($t, "- \t");
-
+        foreach ($items as $t) {
             // «**N2-13** — Perdona, ¿dónde está…?»
             if (! preg_match('/\*\*(.+?)\*\*/u', $t, $m)) {
                 continue;
             }
 
+            // El destino se guarda TAL CUAL esta escrito, solo en minusculas.
+            // Antes se quitaban aqui espacios, # y guiones largos, y eso
+            // destruia justo las pistas que la resolucion de enlaces necesita
+            // para separar «Ojo #1» de su descripcion. Traducirlo a un slug
+            // real es trabajo del Importador, no de este analizador.
             $destino = mb_strtolower(trim($m[1]));
-            $destino = str_replace([' ', '#', '—'], ['', '', ''], $destino);
-            $destino = preg_replace('/^ojo(\d+)$/u', 'ojo-$1', $destino);
 
             $salida[] = [
                 'to_slug'  => mb_substr($destino, 0, 64),

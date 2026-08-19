@@ -259,6 +259,10 @@ class Importador
                 }
             }
 
+            if (! $destino) {
+                $destino = $this->porPalabras($enlace->to_slug, $mapa);
+            }
+
             if ($destino) {
                 $enlace->update(['to_piece_id' => $destino]);
             } else {
@@ -283,8 +287,13 @@ class Importador
 
         $salida = [$this->codigo($izq), $this->slug($izq)];
 
+        // «Ficha de preposiciones» -> ficha-preposiciones: fuera las
+        // particulas, que los slugs reales no las llevan.
+        $salida[] = $this->sinParticulas($this->slug($izq));
+
         if ($der !== '') {
             $salida[] = 'ficha-' . $this->slug($der);
+            $salida[] = 'ficha-' . $this->sinParticulas($this->slug($der));
             $salida[] = $this->slug($der);
             $salida[] = 'cuento-' . $this->slug($der);
         }
@@ -292,10 +301,57 @@ class Importador
         return array_values(array_filter(array_unique($salida)));
     }
 
-    /** «N2-13» -> n2-m13 · «Ojo #9» -> ojo-09 */
+    /** «ficha-de-preposiciones» -> «ficha-preposiciones» */
+    protected function sinParticulas(string $s): string
+    {
+        return preg_replace('/-(?:de|del|la|las|los|el|e|y|para)(?=-|$)/u', '', $s);
+    }
+
+    /**
+     * Ultimo recurso: comparar por palabras.
+     *
+     * «Ficha — diccionario de verbos» se llama en realidad
+     * «ficha-verbos-diccionario»: mismas palabras, otro orden. Si todas las
+     * palabras con peso del enlace estan en el slug (o al reves), es el.
+     */
+    protected function porPalabras(string $bruto, \Illuminate\Support\Collection $mapa): ?int
+    {
+        $palabras = $this->palabras($bruto);
+        if (count($palabras) < 2) {
+            return null;
+        }
+
+        foreach ($mapa as $slug => $id) {
+            $delSlug = $this->palabras($slug);
+            if (count($delSlug) < 2) {
+                continue;
+            }
+            $comunes = array_intersect($palabras, $delSlug);
+            if (count($comunes) === count($palabras) || count($comunes) === count($delSlug)) {
+                return $id;
+            }
+        }
+
+        return null;
+    }
+
+    /** @return array<int,string> palabras con peso, sin particulas */
+    protected function palabras(string $s): array
+    {
+        $s = mb_strtolower($s);
+        $trozos = preg_split('/[^\p{L}\p{N}]+/u', $s, -1, PREG_SPLIT_NO_EMPTY);
+        $vacias = ['de', 'del', 'la', 'las', 'los', 'el', 'e', 'y', 'para', 'ficha', 'cuento', 'ojo'];
+
+        return array_values(array_unique(array_diff($trozos, $vacias)));
+    }
+
+    /** «N2-13» -> n2-m13 · «Ojo #9» -> ojo-09 · «Cuento N2-01» -> cuento-n2-01 */
     protected function codigo(string $s): string
     {
         $s = str_replace([' ', '#'], '', mb_strtolower($s));
+        $s = preg_replace('/^cuenton([123])-(\d{1,2})$/', 'cuento-n$1-$2', $s);
+        $s = preg_replace_callback('/^cuento-n([123])-(\d{1,2})$/',
+            fn ($m) => 'cuento-n' . $m[1] . '-' . str_pad($m[2], 2, '0', STR_PAD_LEFT), $s);
         $s = preg_replace('/^n([123])-(\d{1,2})$/', 'n$1-m$2', $s);
         $s = preg_replace_callback('/^n([123])-m(\d{1,2})$/',
             fn ($m) => 'n' . $m[1] . '-m' . str_pad($m[2], 2, '0', STR_PAD_LEFT), $s);
