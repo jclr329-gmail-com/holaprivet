@@ -10,7 +10,7 @@
     <p class="lema">Три уровня, объяснения по-русски, примеры из настоящей жизни в Испании.</p>
 
     <div class="cifras">
-      <div><b>49</b> модулей</div>
+      <div><b>{{ $modulos }}</b> модулей</div>
       <div><b>{{ $cuentos }}</b> рассказов</div>
       <div><b>{{ $fichas }}</b> карточек</div>
       <div><b>{{ number_format($ejercicios, 0, ',', ' ') }}</b> упражнений</div>

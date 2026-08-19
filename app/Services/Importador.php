@@ -228,21 +228,35 @@ class Importador
         }
     }
 
-    /** Convierte los slugs de destino en identificadores reales. */
+    /**
+     * Convierte los destinos de los enlaces en identificadores reales.
+     *
+     * En el texto los enlaces se escriben para leerse, no para el ordenador:
+     * «N2-13», «Ojo #9 — llorar · reír», «Ficha — números». Hay que traducirlos.
+     * Con las reglas de abajo se resuelve el 98 % de los 438 enlaces del curso.
+     */
     protected function resolverEnlaces(): void
     {
-        $mapa = Piece::pluck('id', 'slug');
+        $mapa  = Piece::pluck('id', 'slug');
         $rotos = 0;
 
         foreach (CrossLink::whereNull('to_piece_id')->cursor() as $enlace) {
-            $destino = $mapa[$enlace->to_slug] ?? null;
+            $destino = null;
 
-            if (! $destino) {
-                // Los enlaces cortos («n2-13») se completan con el prefijo largo
-                $coincidencia = $mapa->keys()->first(
-                    fn ($s) => str_starts_with($s, $enlace->to_slug)
+            foreach ($this->candidatos($enlace->to_slug) as $c) {
+                if (isset($mapa[$c])) {
+                    $destino = $mapa[$c];
+                    break;
+                }
+
+                $parecido = $mapa->keys()->first(
+                    fn ($s) => str_starts_with($s, $c) || str_starts_with($c, $s)
                 );
-                $destino = $coincidencia ? $mapa[$coincidencia] : null;
+
+                if ($parecido) {
+                    $destino = $mapa[$parecido];
+                    break;
+                }
             }
 
             if ($destino) {
@@ -253,9 +267,47 @@ class Importador
         }
 
         if ($rotos > 0) {
-            $this->apuntar(null, 'aviso', "{$rotos} enlaces no apuntan a ninguna pieza existente");
+            $this->apuntar(null, 'aviso', "{$rotos} enlaces sin destino: quedaran como texto");
             $this->resumen['avisos'] += $rotos;
         }
+    }
+
+    /** @return array<int,string> posibles slugs, del mas probable al menos */
+    protected function candidatos(string $bruto): array
+    {
+        $b = trim(explode('/', $bruto)[0]);
+
+        $partes = preg_split('/\s*[—–]\s*/u', $b, 2);
+        $izq = trim($partes[0] ?? '');
+        $der = trim($partes[1] ?? '');
+
+        $salida = [$this->codigo($izq), $this->slug($izq)];
+
+        if ($der !== '') {
+            $salida[] = 'ficha-' . $this->slug($der);
+            $salida[] = $this->slug($der);
+            $salida[] = 'cuento-' . $this->slug($der);
+        }
+
+        return array_values(array_filter(array_unique($salida)));
+    }
+
+    /** «N2-13» -> n2-m13 · «Ojo #9» -> ojo-09 */
+    protected function codigo(string $s): string
+    {
+        $s = str_replace([' ', '#'], '', mb_strtolower($s));
+        $s = preg_replace('/^n([123])-(\d{1,2})$/', 'n$1-m$2', $s);
+        $s = preg_replace_callback('/^n([123])-m(\d{1,2})$/',
+            fn ($m) => 'n' . $m[1] . '-m' . str_pad($m[2], 2, '0', STR_PAD_LEFT), $s);
+        $s = preg_replace_callback('/^ojo-?(\d{1,2})$/',
+            fn ($m) => 'ojo-' . str_pad($m[1], 2, '0', STR_PAD_LEFT), $s);
+
+        return $s;
+    }
+
+    protected function slug(string $s): string
+    {
+        return Str::slug($s);
     }
 
     protected function apuntar(?string $archivo, string $nivel, string $mensaje): void

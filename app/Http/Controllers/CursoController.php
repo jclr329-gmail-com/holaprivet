@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Exercise;
 use App\Models\Piece;
 use App\Support\Markdown;
 
@@ -21,9 +22,12 @@ class CursoController extends Controller
 
         return view('portada', [
             'niveles'   => $niveles,
-            'fichas'    => Piece::whereIn('type', ['ficha_ojo', 'ficha_practica'])->count(),
-            'cuentos'   => Piece::where('type', 'cuento')->count(),
-            'ejercicios'=> Piece::sum('exercise_count'),
+            'modulos'    => Piece::where('type', 'modulo')->count(),
+            'fichas'     => Piece::whereIn('type', ['ficha_ojo', 'ficha_practica'])->count(),
+            'cuentos'    => Piece::where('type', 'cuento')->count(),
+            // Se cuentan los ejercicios reales: el campo declarado deja fuera
+            // las cinco preguntas de cada cuento.
+            'ejercicios' => Exercise::count(),
         ]);
     }
 

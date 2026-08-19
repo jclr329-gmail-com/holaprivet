@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-#  holaprivet.com - script de despliegue  (v6)
+#  holaprivet.com - script de despliegue  (v7)
 #
 #  Particularidades de este hosting que condicionan el script:
 #    - proc_open esta desactivado  -> Composer no puede ejecutar scripts
@@ -21,7 +21,7 @@ COMPOSER="$PHP -d memory_limit=-1 $TOOLS/composer.phar"
 
 exec > "$LOG" 2>&1
 echo "==========================================================="
-echo " DESPLIEGUE v6   $(date)"
+echo " DESPLIEGUE v7   $(date)"
 echo "==========================================================="
 
 paso ()  { echo; echo "----- $1 -----"; }
@@ -143,10 +143,16 @@ else
     PIEZAS=${PIEZAS:-0}
     echo "Piezas actualmente en la base: $PIEZAS"
 
-    if [ "$PIEZAS" = "0" ] || [ -f "$MARCA" ]; then
+    # El archivo VERSION-CONTENIDO marca que el analizador ha cambiado y hay
+    # que releer los .md aunque ya haya piezas en la base.
+    VERSION_ACTUAL=$(cat "$APP/deploy/version-contenido" 2>/dev/null || echo "0")
+    VERSION_PUESTA=$(cat "$VHOST/private/version-contenido" 2>/dev/null || echo "")
+
+    if [ "$PIEZAS" = "0" ] || [ -f "$MARCA" ] || [ "$VERSION_ACTUAL" != "$VERSION_PUESTA" ]; then
         echo "Importando..."
         $PHP artisan contenido:importar --ruta="$CONTENIDO"
         rm -f "$MARCA"
+        echo "$VERSION_ACTUAL" > "$VHOST/private/version-contenido"
     else
         echo "Ya hay contenido importado."
         echo "Para reimportar, crea el archivo vacio:  private/importar-contenido"

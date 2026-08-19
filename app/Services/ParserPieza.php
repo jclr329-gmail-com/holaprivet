@@ -258,82 +258,137 @@ class ParserPieza
 
     // --------------------------------------------------------------- lineas
 
+    /**
+     * Escenas y cuentos se leen distinto y no se pueden tratar igual.
+     *
+     * En una ESCENA cada linea es una replica: «> **Miguel**» seguido de lo que
+     * dice, y las lineas en cursiva sueltas son acotaciones.
+     *
+     * En un CUENTO el texto es prosa: los parrafos ocupan varias lineas y la
+     * negrita puede abrirse en una y cerrarse en la siguiente. Por eso hay que
+     * juntar el parrafo ANTES de limpiar el Markdown; si no, salen asteriscos
+     * sueltos en pantalla.
+     */
     protected function lineas(array $secciones): array
     {
-        $s = $this->seccion($secciones, 'escena') ?? $this->seccion($secciones, 'cuento');
-        if (! $s) {
-            return [];
+        if ($s = $this->seccion($secciones, 'escena')) {
+            return $this->replicas($s['body_md']);
         }
 
+        if ($s = $this->seccion($secciones, 'cuento')) {
+            return $this->prosa($s['body_md']);
+        }
+
+        return [];
+    }
+
+    /** Escena: dialogo con personajes y acotaciones. */
+    protected function replicas(string $md): array
+    {
         $salida    = [];
         $posicion  = 0;
         $personaje = null;
         $acotacion = null;
 
-        foreach (explode("\n", $s['body_md']) as $l) {
+        foreach (explode("\n", $md) as $l) {
             $t = trim($l);
 
             if ($t === '' || $t === '---') {
                 continue;
             }
 
-            // Acotacion en cursiva fuera de cita: *Gostiная...*
-            if (preg_match('/^\*(.+)\*$/u', $t, $m) && ! str_starts_with($t, '>')) {
-                $acotacion = trim($m[1]);
+            // Acotacion suelta en cursiva: cambia de momento o de lugar
+            if (! str_starts_with($t, '>') && preg_match('/^\*(.+)\*$/u', $t, $m)) {
                 $salida[] = [
                     'position'      => $posicion++,
                     'character'     => null,
-                    'stage_note_ru' => mb_substr($acotacion, 0, 200),
+                    'stage_note_ru' => mb_substr(trim($m[1]), 0, 200),
                     'text_es'       => '',
+                    'text_ru'       => null,
                     'is_break'      => true,
                 ];
-                $acotacion = null;
                 continue;
             }
 
-            // Linea de cita
-            if (str_starts_with($t, '>')) {
-                $c = trim(ltrim($t, '> '));
-                if ($c === '') {
-                    continue;
-                }
-
-                // «> **Miguel** *(desde la cocina)*»  → cabecera de personaje
-                if (preg_match('/^\*\*(.+?)\*\*\s*(?:\*\((.+?)\)\*)?$/u', $c, $m)) {
-                    $personaje = trim($m[1]);
-                    $acotacion = isset($m[2]) ? trim($m[2]) : null;
-                    continue;
-                }
-
-                $texto = $c;
-                $nota  = $acotacion;
-                if (preg_match('/^(.*?)\s*\*\((.+?)\)\*\s*$/u', $c, $m)) {
-                    $texto = trim($m[1]);
-                    $nota  = trim($m[2]);
-                }
-
-                $salida[] = [
-                    'position'      => $posicion++,
-                    'character'     => $personaje,
-                    'stage_note_ru' => $nota ? mb_substr($nota, 0, 200) : null,
-                    'text_es'       => $this->limpiarMd($texto),
-                    'is_break'      => false,
-                ];
-                $acotacion = null;
+            if (! str_starts_with($t, '>')) {
                 continue;
             }
 
-            // Prosa de cuento
+            $c = trim(ltrim($t, '> '));
+            if ($c === '') {
+                continue;
+            }
+
+            // Cabecera de replica: «**Miguel** *(desde la cocina)*»
+            if (preg_match('/^\*\*(.+?)\*\*\s*(?:\*\((.+?)\)\*)?$/u', $c, $m)) {
+                $personaje = trim($m[1]);
+                $acotacion = isset($m[2]) ? trim($m[2]) : null;
+                continue;
+            }
+
+            $texto = $c;
+            $nota  = $acotacion;
+            if (preg_match('/^(.*?)\s*\*\((.+?)\)\*\s*$/u', $c, $m)) {
+                $texto = trim($m[1]);
+                $nota  = trim($m[2]);
+            }
+
+            $salida[] = [
+                'position'      => $posicion++,
+                'character'     => $personaje,
+                'stage_note_ru' => $nota ? mb_substr($nota, 0, 200) : null,
+                'text_es'       => $this->limpiarMd($texto),
+                'text_ru'       => null,
+                'is_break'      => false,
+            ];
+            $acotacion = null;
+        }
+
+        return array_values(array_filter($salida, fn ($x) => $x['text_es'] !== '' || $x['is_break']));
+    }
+
+    /** Cuento: prosa por parrafos. */
+    protected function prosa(string $md): array
+    {
+        $salida   = [];
+        $posicion = 0;
+
+        // Se parte por lineas en blanco: cada bloque es un parrafo completo.
+        foreach (preg_split('/\n\s*\n/u', $md) as $bloque) {
+            $bloque = trim($bloque);
+
+            if ($bloque === '' || $bloque === '---') {
+                continue;
+            }
+
+            $esCita = str_starts_with($bloque, '>');
+
+            // Se juntan las lineas del parrafo antes de tocar el Markdown:
+            // asi la negrita partida entre dos lineas se limpia bien.
+            $texto = implode(' ', array_map(
+                fn ($l) => trim(ltrim(trim($l), '> ')),
+                explode("\n", $bloque)
+            ));
+
+            $texto = $this->limpiarMd(trim($texto));
+
+            if ($texto === '') {
+                continue;
+            }
+
             $salida[] = [
                 'position'      => $posicion++,
                 'character'     => null,
-                'stage_note_ru' => null,
-                'text_es'       => $this->limpiarMd($t),
+                // Marca interna: en los cuentos, los bloques citados son el
+                // texto de una nota, una lista o un cartel. Se pintan aparte.
+                'stage_note_ru' => $esCita ? 'cita' : null,
+                'text_es'       => $texto,
+                'text_ru'       => null,
                 'is_break'      => false,
             ];
         }
 
-        return array_values(array_filter($salida, fn ($x) => $x['text_es'] !== '' || $x['is_break']));
+        return $salida;
     }
 
     // --------------------------------------------------------------- frases

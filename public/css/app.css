@@ -136,8 +136,23 @@ hr{border:0; border-top:1px solid var(--linea); margin:2rem 0}
 .corte{text-align:center; color:var(--gris-suave); font-style:italic;
   font-size:.85rem; font-family:var(--serif); padding:.5rem 0}
 
-/* ---------------------------------------------------------------- prosa */
-.prosa p{font-size:1.03rem}
+/* ---------------------------------------------------------------- relato
+   En los cuentos el texto es prosa continua. Si cada frase llevara el
+   subrayado punteado, la pagina entera seria un campo de puntos: aqui el
+   audio se sugiere solo al pasar por encima.                              */
+.relato{padding:1.6rem 1.6rem .8rem}
+.relato p{font-size:1.06rem; line-height:1.72; margin:0 0 1.05rem}
+.relato .trad{font-family:var(--serif); font-size:.95rem; margin-top:-.7rem}
+.es.lisa{border-bottom:0; font-weight:400; padding-bottom:0}
+.es.lisa:hover,.es.lisa:focus-visible,.es.lisa.son{
+  background-size:100% 100%; border-bottom:0; border-radius:2px;
+}
+.nota-cuento{
+  margin:0 0 1.05rem; padding:.75rem 1.1rem; border-left:3px solid var(--azul-claro);
+  background:var(--cal); border-radius:0 6px 6px 0;
+  font-family:var(--serif); font-style:italic; color:var(--gris);
+}
+.nota-cuento .es{font-style:italic}
 
 /* --------------------------------------------------------------- frases */
 .frases{list-style:none; margin:0; padding:0; counter-reset:f}
