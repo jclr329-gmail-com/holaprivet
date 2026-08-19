@@ -68,7 +68,7 @@
 
     <p class="pie">
         Entorno de pruebas.
-        Hito 2: esquema completo creado, a la espera de importar los 95 archivos.
+        Hito 3: importador de contenido listo.
     </p>
 </div>
 </body>

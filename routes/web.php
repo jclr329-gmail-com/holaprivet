@@ -12,8 +12,9 @@ Route::get('/', function () {
 
         // Recuento de filas de las tablas que nos interesan
         $tablas = [];
-        foreach (['pieces', 'exercises', 'exercise_options', 'vocabulary',
-                  'dialogue_lines', 'phrases', 'tags', 'users'] as $t) {
+        foreach (['pieces', 'piece_sections', 'exercises', 'exercise_options',
+                  'vocabulary', 'dialogue_lines', 'phrases', 'cross_links',
+                  'tags', 'users'] as $t) {
             $tablas[$t] = DB::table($t)->count();
         }
         $bd['tablas']  = $tablas;

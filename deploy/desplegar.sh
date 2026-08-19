@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-#  holaprivet.com - script de despliegue  (v4)
+#  holaprivet.com - script de despliegue  (v5)
 #
 #  Particularidades de este hosting que condicionan el script:
 #    - proc_open esta desactivado  -> Composer no puede ejecutar scripts
@@ -21,7 +21,7 @@ COMPOSER="$PHP -d memory_limit=-1 $TOOLS/composer.phar"
 
 exec > "$LOG" 2>&1
 echo "==========================================================="
-echo " DESPLIEGUE v4   $(date)"
+echo " DESPLIEGUE v5   $(date)"
 echo "==========================================================="
 
 paso ()  { echo; echo "----- $1 -----"; }
@@ -128,6 +128,30 @@ CLAVE=$(grep -m1 '^APP_KEY=' "$APP/.env" | cut -d= -f2- | tr -d '\r\n "'"'"'')
 # --- 8. Base de datos ------------------------------------------------------
 paso "8. Migraciones"
 $PHP artisan migrate --force || morir "fallaron las migraciones - revisa los datos de la base"
+
+# --- 8-bis. Importacion del contenido --------------------------------------
+# Solo si existe la carpeta y solo si la base esta vacia o se pide
+# expresamente creando el archivo  private/importar-contenido
+paso "8-bis. Contenido del curso"
+CONTENIDO=$VHOST/private/contenido
+MARCA=$VHOST/private/importar-contenido
+
+if [ ! -d "$CONTENIDO" ]; then
+    echo "No hay carpeta de contenido en $CONTENIDO - se omite."
+else
+    PIEZAS=$($PHP artisan tinker --execute="echo \App\Models\Piece::count();" 2>/dev/null | tail -1 | tr -dc '0-9')
+    PIEZAS=${PIEZAS:-0}
+    echo "Piezas actualmente en la base: $PIEZAS"
+
+    if [ "$PIEZAS" = "0" ] || [ -f "$MARCA" ]; then
+        echo "Importando..."
+        $PHP artisan contenido:importar --ruta="$CONTENIDO"
+        rm -f "$MARCA"
+    else
+        echo "Ya hay contenido importado."
+        echo "Para reimportar, crea el archivo vacio:  private/importar-contenido"
+    fi
+fi
 
 # --- 9. Optimizacion -------------------------------------------------------
 paso "9. Optimizacion"
