@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-#  holaprivet.com - script de despliegue  (v3)
+#  holaprivet.com - script de despliegue  (v4)
 #
 #  Particularidades de este hosting que condicionan el script:
 #    - proc_open esta desactivado  -> Composer no puede ejecutar scripts
@@ -21,7 +21,7 @@ COMPOSER="$PHP -d memory_limit=-1 $TOOLS/composer.phar"
 
 exec > "$LOG" 2>&1
 echo "==========================================================="
-echo " DESPLIEGUE v3   $(date)"
+echo " DESPLIEGUE v4   $(date)"
 echo "==========================================================="
 
 paso ()  { echo; echo "----- $1 -----"; }
@@ -44,8 +44,10 @@ done
 # --- 2. Configuracion ------------------------------------------------------
 paso "2. Configuracion (.env)"
 if [ -f "$ENVFILE" ]; then
-    cp "$ENVFILE" "$APP/.env" && chmod 600 "$APP/.env"
-    echo "Copiado desde $ENVFILE"
+    # tr -d elimina los retornos de carro de Windows: si quedan, Laravel
+    # lee los valores con un caracter invisible al final y falla.
+    tr -d '\r' < "$ENVFILE" > "$APP/.env" && chmod 600 "$APP/.env"
+    echo "Copiado desde $ENVFILE (saltos de linea normalizados)"
 elif [ -f "$APP/.env" ]; then
     echo "AVISO: no esta $ENVFILE, se conserva el .env existente"
 else
@@ -109,12 +111,19 @@ $PHP artisan package:discover --ansi || echo "(se generara solo al primer uso)"
 
 # --- 7. Clave de aplicacion ------------------------------------------------
 paso "7. Clave de aplicacion"
-if grep -q '^APP_KEY=$' "$APP/.env"; then
+# Se extrae el valor real, sin depender del formato de los saltos de linea.
+CLAVE=$(grep -m1 '^APP_KEY=' "$APP/.env" | cut -d= -f2- | tr -d '\r\n "'"'"'')
+if [ -z "$CLAVE" ]; then
+    echo "No hay clave: generando una nueva."
     $PHP artisan key:generate --force || morir "no se pudo generar la clave"
     cp "$APP/.env" "$ENVFILE" && echo "Clave guardada tambien en $ENVFILE"
 else
-    echo "Ya existe."
+    echo "Ya existe (${CLAVE:0:12}...)."
 fi
+
+# Comprobacion final: sin clave, la web devuelve error 500.
+CLAVE=$(grep -m1 '^APP_KEY=' "$APP/.env" | cut -d= -f2- | tr -d '\r\n "'"'"'')
+[ -z "$CLAVE" ] && morir "sigue sin haber APP_KEY en el .env"
 
 # --- 8. Base de datos ------------------------------------------------------
 paso "8. Migraciones"
