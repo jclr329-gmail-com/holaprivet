@@ -18,6 +18,9 @@ class Importador
 {
     protected ContentVersion $version;
 
+    /** Identificadores ya vistos, para detectar duplicados. */
+    protected array $vistos = [];
+
     protected array $resumen = [
         'archivos'   => 0,
         'piezas'     => 0,
@@ -64,26 +67,41 @@ class Importador
         return $this->resumen + ['version' => $this->version->id];
     }
 
-    /** @return array<int,string> */
+    /**
+     * Busca todos los .md de forma recursiva.
+     *
+     * Se recorre el arbol entero en vez de usar rutas fijas por dos motivos:
+     * Linux distingue mayusculas —«Modulos» no es «modulos»— y asi da igual
+     * como se llamen las carpetas o cuantos niveles tengan.
+     *
+     * @return array<int,string>
+     */
     protected function archivos(): array
     {
         $salida = [];
 
-        foreach (['modulos', 'cuentos', 'fichas'] as $carpeta) {
-            $patron = rtrim($this->ruta, '/') . "/{$carpeta}/*/*.md";
-            $salida = array_merge($salida, glob($patron) ?: []);
+        $iterador = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(
+                rtrim($this->ruta, '/'),
+                \FilesystemIterator::SKIP_DOTS
+            )
+        );
+
+        foreach ($iterador as $archivo) {
+            if (! $archivo->isFile() || strtolower($archivo->getExtension()) !== 'md') {
+                continue;
+            }
+            $salida[] = $archivo->getPathname();
         }
 
-        // Tambien los .md sueltos en la raiz de cada carpeta
-        $salida = array_merge($salida, glob(rtrim($this->ruta, '/') . '/*/*.md') ?: []);
-
-        $salida = array_values(array_unique($salida));
         sort($salida);
 
-        // Se descartan los documentos de trabajo
-        return array_values(array_filter($salida, function ($f) {
-            $n = strtoupper(pathinfo($f, PATHINFO_FILENAME));
-            return ! in_array($n, ['PLAN', 'ESTADO', 'FORMATO', 'README', 'PERSONAJES'], true);
+        // Documentos de trabajo del proyecto: no son contenido del curso.
+        $descartar = ['PLAN', 'ESTADO', 'FORMATO', 'README', 'PERSONAJES',
+                      'PROMPTS-IMAGEN', 'ESPECIFICACIONES', 'INSTALACION', 'ESQUEMA-BD'];
+
+        return array_values(array_filter($salida, function ($f) use ($descartar) {
+            return ! in_array(strtoupper(pathinfo($f, PATHINFO_FILENAME)), $descartar, true);
         }));
     }
 
@@ -103,6 +121,17 @@ class Importador
         if (! $datos) {
             return;
         }
+
+        // Dos archivos con el mismo id: normalmente una copia antigua que
+        // sobrevivio a un cambio de nombre. Se avisa y se omite el segundo.
+        $slug = $datos['pieza']['slug'];
+        if (isset($this->vistos[$slug])) {
+            $this->apuntar($nombre, 'error',
+                "id repetido «{$slug}»: ya lo trae {$this->vistos[$slug]}. Borra el archivo antiguo.");
+            $this->resumen['errores']++;
+            return;
+        }
+        $this->vistos[$slug] = $nombre;
 
         $tieneErrores = collect($parser->incidencias)->contains(fn ($i) => $i['nivel'] === 'error');
 

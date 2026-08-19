@@ -23,6 +23,12 @@ class ParserPieza
 
         [$cab, $cuerpo] = FrontMatter::separar($bruto);
 
+        if (empty($cab)) {
+            // Sin cabecera YAML no es una pieza del curso: se omite sin ruido.
+            $this->aviso('no tiene cabecera: no parece contenido del curso, se omite');
+            return null;
+        }
+
         if (empty($cab['id'])) {
             $this->error('falta el campo id en la cabecera');
             return null;
