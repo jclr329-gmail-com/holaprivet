@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>@yield('titulo', 'holaprivet') · holaprivet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/app.css?v=1">
+</head>
+<body>
+
+<header class="barra">
+  <div class="barra-in">
+    <a class="marca" href="{{ route('portada') }}">hola<span>privet</span></a>
+    <nav>
+      <a href="{{ route('portada') }}" class="{{ request()->is('/') || request()->is('nivel/*') ? 'act' : '' }}">Курс</a>
+      <a href="{{ route('fichas') }}"  class="{{ request()->is('fichas') ? 'act' : '' }}">Карточки</a>
+    </nav>
+  </div>
+</header>
+
+@yield('cuerpo')
+
+<footer class="pie-web">
+  <div>
+    <span>holaprivet · Испанский для русскоговорящих</span>
+    <span>Бета-версия</span>
+  </div>
+</footer>
+
+<script>
+// Cada fragmento en espanol podra reproducirse cuando existan los audios.
+// De momento solo se resalta, para que la interaccion ya este en su sitio.
+document.querySelectorAll('.es').forEach(function (el) {
+  var sonar = function () {
+    el.classList.add('son');
+    setTimeout(function () { el.classList.remove('son'); }, 900);
+  };
+  el.addEventListener('mouseenter', sonar);
+  el.addEventListener('click', sonar);
+  el.tabIndex = 0;
+  el.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sonar(); }
+  });
+});
+</script>
+</body>
+</html>

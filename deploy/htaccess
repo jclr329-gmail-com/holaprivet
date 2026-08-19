@@ -26,5 +26,5 @@
 </FilesMatch>
 
 RedirectMatch 404 /\.git
-RedirectMatch 404 /app/
-RedirectMatch 404 /\.tools/
+RedirectMatch 404 ^/app/
+RedirectMatch 404 ^/\.tools/

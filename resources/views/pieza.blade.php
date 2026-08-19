@@ -1,0 +1,83 @@
+@extends('layout')
+@section('titulo', $pieza->title_es)
+
+@section('cuerpo')
+<div class="envoltura">
+
+  {{-- Índice lateral: solo en pantallas anchas --}}
+  <aside class="indice">
+    <h2>В этом материале</h2>
+    <ol>
+      @foreach ($secciones as $s)
+        <li>
+          <a href="#s{{ $s->number }}">
+            <span class="n">{{ $s->number }}</span>
+            <span>{{ $s->title_ru ?: $s->title_es }}</span>
+          </a>
+        </li>
+      @endforeach
+    </ol>
+  </aside>
+
+  <main>
+    @php
+      $etiqueta = match ($pieza->type) {
+        'modulo'         => 'Уровень ' . $pieza->level . ' · Модуль ' . $pieza->position,
+        'cuento'         => 'Рассказ · Уровень ' . $pieza->level,
+        'ficha_ojo'      => 'Осторожно, похожие слова № ' . $pieza->position,
+        default          => 'Справочная карточка',
+      };
+    @endphp
+
+    <div class="eyebrow"><span class="pipe"></span> {{ $etiqueta }}</div>
+    <h1>{{ $pieza->title_es }}</h1>
+    <p class="h1-ru">{{ $pieza->title_ru }}</p>
+
+    <div class="meta">
+      @if ($pieza->duration_min)<span class="chip"><b>{{ $pieza->duration_min }}</b> минут</span>@endif
+      @if ($pieza->exercise_count)<span class="chip"><b>{{ $pieza->exercise_count }}</b> упражнений</span>@endif
+      @if ($pieza->word_count)<span class="chip"><b>{{ $pieza->word_count }}</b> слов</span>@endif
+      @if ($pieza->characters)<span class="chip">{{ implode(' · ', $pieza->characters) }}</span>@endif
+    </div>
+
+    @foreach ($secciones as $s)
+      <section id="s{{ $s->number }}" @class(['tarea' => $s->kind === 'tarea'])>
+        <h2>{{ $s->title_es }}</h2>
+        @if ($s->title_ru)<p class="h2-ru">{{ $s->title_ru }}</p>@endif
+
+        @switch($s->kind)
+          @case('apoyo')
+            @include('partes.glosario', ['pieza' => $pieza])
+            @break
+
+          @case('escena')
+          @case('cuento')
+            @include('partes.escena', ['pieza' => $pieza, 'esCuento' => $s->kind === 'cuento'])
+            @break
+
+          @case('frases')
+            @include('partes.frases', ['pieza' => $pieza])
+            @break
+
+          @case('enlaces')
+            @include('partes.enlaces', ['pieza' => $pieza])
+            @break
+
+          @default
+            {!! $s->html !!}
+        @endswitch
+      </section>
+    @endforeach
+
+    @if ($siguiente)
+      <div class="siguiente">
+        <div>
+          <div class="et">Дальше</div>
+          <div class="ti">{{ $siguiente->title_es }}</div>
+        </div>
+        <a href="{{ route('pieza', $siguiente->slug) }}">Продолжить →</a>
+      </div>
+    @endif
+  </main>
+</div>
+@endsection

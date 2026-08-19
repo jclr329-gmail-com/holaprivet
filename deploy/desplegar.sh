@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-#  holaprivet.com - script de despliegue  (v5)
+#  holaprivet.com - script de despliegue  (v6)
 #
 #  Particularidades de este hosting que condicionan el script:
 #    - proc_open esta desactivado  -> Composer no puede ejecutar scripts
@@ -21,7 +21,7 @@ COMPOSER="$PHP -d memory_limit=-1 $TOOLS/composer.phar"
 
 exec > "$LOG" 2>&1
 echo "==========================================================="
-echo " DESPLIEGUE v5   $(date)"
+echo " DESPLIEGUE v6   $(date)"
 echo "==========================================================="
 
 paso ()  { echo; echo "----- $1 -----"; }
@@ -164,12 +164,12 @@ $PHP artisan view:cache
 
 # --- 10. Publicacion -------------------------------------------------------
 paso "10. Publicacion"
-cp -f "$APP/public/index.php"  "$SUB/index.php"  || morir "no se pudo copiar index.php"
-cp -f "$APP/deploy/htaccess"   "$SUB/.htaccess"  || morir "no se pudo copiar el .htaccess"
-cp -f "$APP/public/robots.txt" "$SUB/robots.txt" 2>/dev/null
-[ -d "$APP/public/build" ] && cp -rf "$APP/public/build" "$SUB/"
+# Se copia TODO el contenido de public/ (index.php, css/, js/, img/...)
+cp -rf "$APP/public/." "$SUB/" || morir "no se pudo publicar la carpeta public"
+cp -f  "$APP/deploy/htaccess" "$SUB/.htaccess" || morir "no se pudo copiar el .htaccess"
 rm -f "$SUB/index.html"
-ls -la "$SUB" | grep -E 'index.php|htaccess|robots'
+echo "Publicado:"
+ls -la "$SUB" | grep -E 'index.php|htaccess|robots|css'
 
 # --- 11. Resumen -----------------------------------------------------------
 paso "11. Resultado"

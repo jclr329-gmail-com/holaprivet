@@ -1,28 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\CursoController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    $bd = ['ok' => false, 'mensaje' => ''];
-
-    try {
-        $bd['version']      = DB::selectOne('SELECT VERSION() AS v')->v;
-        $bd['cotejamiento'] = DB::selectOne('SELECT @@collation_database AS c')->c;
-
-        // Recuento de filas de las tablas que nos interesan
-        $tablas = [];
-        foreach (['pieces', 'piece_sections', 'exercises', 'exercise_options',
-                  'vocabulary', 'dialogue_lines', 'phrases', 'cross_links',
-                  'tags', 'users'] as $t) {
-            $tablas[$t] = DB::table($t)->count();
-        }
-        $bd['tablas']  = $tablas;
-        $bd['totales'] = count(DB::select('SHOW TABLES'));
-        $bd['ok']      = true;
-    } catch (\Throwable $e) {
-        $bd['mensaje'] = $e->getMessage();
-    }
-
-    return view('bienvenida', ['bd' => $bd]);
-});
+Route::get('/',                [CursoController::class, 'portada'])->name('portada');
+Route::get('/nivel/{n}',       [CursoController::class, 'nivel'])->whereNumber('n')->name('nivel');
+Route::get('/fichas',          [CursoController::class, 'fichas'])->name('fichas');
+Route::get('/p/{slug}',        [CursoController::class, 'pieza'])->name('pieza');
