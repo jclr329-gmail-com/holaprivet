@@ -253,3 +253,71 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
 .pie-web div{max-width:76rem; margin:0 auto; padding:2rem 1.5rem;
   font-size:.83rem; color:var(--gris-suave); display:flex;
   justify-content:space-between; gap:1rem; flex-wrap:wrap}
+
+/* ------------------------------------------------------------- ejercicios */
+/* Interactivos: un intento por pregunta, correccion inmediata, resumen. */
+
+.ej-como{color:var(--gris); font-size:.93rem}
+
+.ej-progreso{
+  height:6px; background:var(--azul-claro); border-radius:99px;
+  overflow:hidden; margin:.25rem 0 .1rem;
+}
+.ej-barra{
+  display:block; height:100%; width:0; background:var(--azul);
+  border-radius:99px; transition:width .25s ease;
+}
+.ej-cuenta{color:var(--gris-suave); font-size:.85rem; margin:.15rem 0 1.2rem}
+
+.ej-lista{padding-left:1.6rem; margin:0}
+.ejercicio{margin:0 0 1.4rem}
+.ej-enunciado{margin:.1rem 0 .55rem; font-family:var(--serif)}
+
+.opciones{display:flex; flex-wrap:wrap; gap:.5rem}
+.opcion{
+  font:inherit; font-size:.95rem; color:var(--tinta);
+  background:var(--papel); border:1.5px solid var(--linea);
+  border-radius:var(--radio); padding:.42rem .8rem; cursor:pointer;
+  transition:border-color .12s ease, background .12s ease;
+}
+.opcion:hover:not(:disabled){border-color:var(--azul)}
+.opcion:disabled{cursor:default; color:var(--gris)}
+.opcion .letra{color:var(--gris-suave); font-size:.85em; margin-right:.15rem}
+
+.opcion.op-correcta{
+  border-color:var(--verde); background:#EAF3EE; color:var(--verde);
+  font-weight:700;
+}
+.opcion.op-correcta .letra{color:var(--verde)}
+.opcion.op-fallida{
+  border-color:var(--rojo); background:#F7ECEC; color:var(--rojo);
+  text-decoration:line-through;
+}
+.opcion.op-fallida .letra{color:var(--rojo)}
+
+.explicacion{
+  margin:.6rem 0 0; padding:.5rem .9rem; font-size:.92rem;
+  color:var(--gris); background:var(--cal);
+  border-left:3px solid var(--linea); border-radius:0 var(--radio) var(--radio) 0;
+}
+.ej-acierto .explicacion{border-left-color:var(--verde)}
+.ej-fallo   .explicacion{border-left-color:var(--rojo)}
+.explicacion .veredicto{color:var(--tinta)}
+
+.ej-resumen{
+  margin-top:1.8rem; padding:1.2rem 1.4rem; text-align:center;
+  background:var(--papel); border:1.5px solid var(--linea);
+  border-radius:var(--radio);
+}
+.ej-nota{
+  font-family:var(--serif); font-size:1.9rem; font-weight:700;
+  color:var(--azul);
+}
+.ej-frase{margin:.3rem 0 .6rem; color:var(--gris)}
+.ej-repaso{font-size:.92rem; margin:.2rem 0 .9rem}
+.ej-reiniciar{
+  font:inherit; font-size:.95rem; cursor:pointer;
+  color:var(--azul); background:var(--azul-claro); border:none;
+  border-radius:99px; padding:.5rem 1.3rem;
+}
+.ej-reiniciar:hover{background:#CFE0ED}

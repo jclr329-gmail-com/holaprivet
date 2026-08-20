@@ -49,5 +49,6 @@ document.querySelectorAll('.es').forEach(function (el) {
   });
 });
 </script>
+@stack('js')
 </body>
 </html>

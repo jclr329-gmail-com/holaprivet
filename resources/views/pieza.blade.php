@@ -63,6 +63,15 @@
             @include('partes.enlaces', ['pieza' => $pieza])
             @break
 
+          @case('ejercicios')
+          @case('preguntas')
+            @if ($interactivo)
+              @include('partes.ejercicios', ['pieza' => $pieza, 'repasos' => $repasos])
+            @else
+              {!! $s->html !!}
+            @endif
+            @break
+
           @default
             {!! $s->html !!}
         @endswitch
@@ -80,4 +89,10 @@
     @endif
   </main>
 </div>
+
+@if ($interactivo)
+  @push('js')
+    <script src="/js/ejercicios.js?v={{ @filemtime(public_path('js/ejercicios.js')) ?: 1 }}" defer></script>
+  @endpush
+@endif
 @endsection

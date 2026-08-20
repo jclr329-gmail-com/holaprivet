@@ -65,13 +65,38 @@ class CursoController extends Controller
     {
         $pieza = Piece::where('slug', $slug)->firstOrFail();
 
-        $pieza->load(['sections', 'vocabulary', 'lines', 'phrases', 'links']);
+        $pieza->load(['sections', 'vocabulary', 'lines', 'phrases', 'links',
+                      'exercises.options']);
+
+        // Con ejercicios en la base de datos, la seccion se vuelve
+        // interactiva: cada solucion aparece al responder, asi que el
+        // solucionario como seccion sobra (y destriparia las respuestas).
+        $interactivo = $pieza->exercises->isNotEmpty();
 
         $md = new Markdown;
 
+        $secciones = $pieza->sections;
+
+        if ($interactivo) {
+            $secciones = $secciones->reject(fn ($s) => $s->kind === 'soluciones')->values();
+
+            // Sin el solucionario quedaria un hueco en la numeracion del
+            // indice; se renumera solo para pintar, la base no se toca.
+            $n = 0;
+            foreach ($secciones as $s) {
+                $s->number = ++$n;
+            }
+        }
+
         // Cada seccion se prepara segun su tipo
-        $secciones = $pieza->sections->map(function ($s) use ($md, $pieza) {
-            $s->html = in_array($s->kind, ['apoyo', 'escena', 'cuento', 'frases', 'enlaces'], true)
+        $propias = ['apoyo', 'escena', 'cuento', 'frases', 'enlaces'];
+        if ($interactivo) {
+            $propias[] = 'ejercicios';
+            $propias[] = 'preguntas';
+        }
+
+        $secciones = $secciones->map(function ($s) use ($md, $propias) {
+            $s->html = in_array($s->kind, $propias, true)
                 ? null                       // estas se pintan con sus propios datos
                 : $md->aHtml($s->body_md);
 
@@ -79,8 +104,36 @@ class CursoController extends Controller
         });
 
         $siguiente = $this->siguiente($pieza);
+        $repasos   = $interactivo ? $this->repasos($pieza) : collect();
 
-        return view('pieza', compact('pieza', 'secciones', 'siguiente'));
+        return view('pieza', compact('pieza', 'secciones', 'siguiente', 'interactivo', 'repasos'));
+    }
+
+    /**
+     * Piezas que conviene repasar segun las soluciones de esta.
+     *
+     * Algunas explicaciones traen una marca de repaso —«(повторение N2-04)»—
+     * que el importador guardo como codigo corto. Aqui se traduce a piezas
+     * reales para ofrecerlas en el resumen final de los ejercicios.
+     */
+    protected function repasos(Piece $pieza)
+    {
+        return $pieza->exercises
+            ->pluck('review_of_slug')
+            ->filter()
+            ->unique()
+            ->map(function ($codigo) {
+                $c = str_replace('#', '-', mb_strtolower($codigo));
+                $c = preg_replace_callback('/^ojo-?(\d{1,2})$/',
+                    fn ($m) => 'ojo-' . str_pad($m[1], 2, '0', STR_PAD_LEFT), $c);
+
+                return Piece::where('slug', $c)
+                    ->orWhere('slug', 'like', $c . '-%')
+                    ->first();
+            })
+            ->filter()
+            ->unique('id')
+            ->values();
     }
 
     protected function siguiente(Piece $pieza): ?Piece
