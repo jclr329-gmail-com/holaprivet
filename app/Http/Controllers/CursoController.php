@@ -21,6 +21,7 @@ class CursoController extends Controller
         }
 
         return view('portada', [
+            'camino'    => $this->camino(),
             'niveles'   => $niveles,
             'modulos'    => Piece::where('type', 'modulo')->count(),
             'fichas'     => Piece::whereIn('type', ['ficha_ojo', 'ficha_practica'])->count(),
@@ -48,7 +49,8 @@ class CursoController extends Controller
             3 => ['Решаю свои дела по-испански',   'Resuelvo mi vida en español'],
         ];
 
-        return view('nivel', compact('n', 'modulos', 'cuentos') + ['nombre' => $nombres[$n]]);
+        return view('nivel', compact('n', 'modulos', 'cuentos')
+            + ['nombre' => $nombres[$n], 'camino' => $this->camino($n)]);
     }
 
     /** La biblioteca de fichas. */
@@ -134,6 +136,64 @@ class CursoController extends Controller
             ->filter()
             ->unique('id')
             ->values();
+    }
+
+    /**
+     * El camino del curso: la secuencia en la que se estudia.
+     *
+     * Modulos por nivel y posicion; cada cuento entra justo despues del
+     * modulo que su «leer_despues_de» señala. Sin cuentas de usuario, el
+     * servidor solo publica el ORDEN: quien sabe que hay hecho y que no es
+     * el navegador (localStorage), y alli se decora.
+     *
+     * @return array<int,array{slug:string,url:string,etiqueta:string,titulo:string}>
+     */
+    protected function camino(?int $nivel = null): array
+    {
+        $de = function (string $tipo) use ($nivel) {
+            return Piece::where('type', $tipo)
+                ->when($nivel, fn ($q) => $q->where('level', $nivel))
+                ->orderBy('level')->orderBy('position')
+                ->get(['id', 'slug', 'position', 'title_es', 'read_after_slug']);
+        };
+
+        $modulos = $de('modulo');
+        $cuentos = $de('cuento')->groupBy(fn ($c) => mb_strtolower($c->read_after_slug ?? ''));
+        $usadas  = [];
+
+        $camino = [];
+        foreach ($modulos as $m) {
+            $codigo = preg_match('/^(n\d-m\d{2})/', $m->slug, $x) ? $x[1] : $m->slug;
+            $camino[] = $this->paso($m, 'Модуль');
+
+            foreach ($cuentos->get($codigo, collect()) as $c) {
+                $camino[]         = $this->paso($c, 'Рассказ');
+                $usadas[$codigo]  = true;
+            }
+        }
+
+        // Cuentos cuya ancla no casara con ningun modulo (no deberia pasar):
+        // mejor al final del camino que perdidos.
+        foreach ($cuentos as $codigo => $grupo) {
+            if (! isset($usadas[$codigo])) {
+                foreach ($grupo as $c) {
+                    $camino[] = $this->paso($c, 'Рассказ');
+                }
+            }
+        }
+
+        return $camino;
+    }
+
+    /** @return array{slug:string,url:string,etiqueta:string,titulo:string} */
+    protected function paso(Piece $p, string $tipo): array
+    {
+        return [
+            'slug'     => $p->slug,
+            'url'      => route('pieza', $p->slug),
+            'etiqueta' => $tipo . ' ' . $p->position,
+            'titulo'   => $p->title_es,
+        ];
     }
 
     protected function siguiente(Piece $pieza): ?Piece

@@ -15,6 +15,8 @@
   var total = lista.length;
   if (!total) return;
 
+  var hecha = 'hp-done-' + raiz.getAttribute('data-pieza');
+
   var estado = {};
   try { estado = JSON.parse(localStorage.getItem(clave) || '{}') || {}; }
   catch (e) { estado = {}; }
@@ -66,7 +68,15 @@
     var resumen = raiz.querySelector('.ej-resumen');
     if (!resumen) return;
 
-    if (hechas < total) { resumen.hidden = true; return; }
+    if (hechas < total) {
+      resumen.hidden = true;
+      try { localStorage.removeItem(hecha); } catch (e) {}
+      return;
+    }
+
+    // Pieza completada: la marca que la portada y los niveles leen para
+    // pintar el camino (✓ en la tarjeta y «siguiente paso»).
+    try { localStorage.setItem(hecha, aciertos + ' из ' + total); } catch (e) {}
 
     var nota  = resumen.querySelector('.ej-nota');
     var frase = resumen.querySelector('.ej-frase');
@@ -102,7 +112,7 @@
 
     if (e.target.closest('.ej-reiniciar')) {
       estado = {};
-      try { localStorage.removeItem(clave); } catch (er) {}
+      try { localStorage.removeItem(clave); localStorage.removeItem(hecha); } catch (er) {}
 
       lista.forEach(function (ej) {
         ej.classList.remove('ej-acierto', 'ej-fallo');

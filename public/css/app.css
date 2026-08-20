@@ -321,3 +321,40 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
   border-radius:99px; padding:.5rem 1.3rem;
 }
 .ej-reiniciar:hover{background:#CFE0ED}
+
+/* ----------------------------------------------------------------- camino */
+/* El curso como recorrido: hecho ✓, «вы здесь», y el futuro en voz baja. */
+
+.continuar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; margin:1.4rem 0 .4rem; padding:.9rem 1.3rem;
+  background:var(--azul); color:#fff; text-decoration:none;
+  border-radius:var(--radio);
+}
+.continuar .c-et{
+  display:block; font-size:.8rem; text-transform:uppercase;
+  letter-spacing:.06em; opacity:.75;
+}
+.continuar .c-ti{display:block; font-family:var(--serif); font-size:1.15rem; font-weight:700}
+.continuar .c-flecha{font-size:1.5rem; transition:transform .15s ease}
+.continuar:hover .c-flecha{transform:translateX(4px)}
+
+.tarjeta{position:relative}
+
+.tarjeta .marca-hecha{
+  position:absolute; top:.7rem; right:.7rem;
+  font-size:.78rem; font-weight:700; color:var(--verde);
+  background:#EAF3EE; border-radius:99px; padding:.12rem .55rem;
+}
+.tarjeta.hecha{border-color:#BFD8CB}
+
+.tarjeta.aqui{border-color:var(--azul); box-shadow:0 0 0 2px var(--azul-claro)}
+.tarjeta .marca-aqui{
+  position:absolute; top:-.62rem; left:.9rem;
+  font-size:.72rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.05em; color:#fff; background:var(--azul);
+  border-radius:99px; padding:.1rem .6rem;
+}
+
+.tarjeta.futura{opacity:.55}
+.tarjeta.futura:hover{opacity:1}

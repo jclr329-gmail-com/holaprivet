@@ -9,7 +9,7 @@
 
   <div class="rejilla tres">
     @foreach ($modulos as $m)
-      <a class="tarjeta" href="{{ route('pieza', $m->slug) }}">
+      <a class="tarjeta" data-slug="{{ $m->slug }}" href="{{ route('pieza', $m->slug) }}">
         <div class="num">Модуль {{ $m->position }}</div>
         <div class="tit">{{ $m->title_es }}</div>
         <div class="sub">{{ $m->title_ru }}</div>
@@ -29,7 +29,7 @@
     </div>
     <div class="rejilla tres">
       @foreach ($cuentos as $c)
-        <a class="tarjeta" href="{{ route('pieza', $c->slug) }}">
+        <a class="tarjeta" data-slug="{{ $c->slug }}" href="{{ route('pieza', $c->slug) }}">
           <div class="num">Рассказ {{ $c->position }}</div>
           <div class="tit">{{ $c->title_es }}</div>
           <div class="sub">{{ $c->title_ru }}</div>
@@ -42,4 +42,9 @@
     </div>
   @endif
 </div>
+
+<script type="application/json" id="camino-datos">@json($camino)</script>
+@push('js')
+  <script src="/js/camino.js?v={{ @filemtime(public_path('js/camino.js')) ?: 1 }}" defer></script>
+@endpush
 @endsection

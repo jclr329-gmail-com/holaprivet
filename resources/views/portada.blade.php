@@ -9,6 +9,14 @@
     <h1>Испанский для тех, кто уже здесь живёт</h1>
     <p class="lema">Три уровня, объяснения по-русски, примеры из настоящей жизни в Испании.</p>
 
+    <a class="continuar" data-continuar hidden href="#">
+      <span>
+        <span class="c-et"></span>
+        <span class="c-ti"></span>
+      </span>
+      <span class="c-flecha" aria-hidden="true">→</span>
+    </a>
+
     <div class="cifras">
       <div><b>{{ $modulos }}</b> модулей</div>
       <div><b>{{ $cuentos }}</b> рассказов</div>
@@ -28,7 +36,7 @@
 
     <div class="rejilla tres">
       @foreach ($niveles[$n] as $m)
-        <a class="tarjeta" href="{{ route('pieza', $m->slug) }}">
+        <a class="tarjeta" data-slug="{{ $m->slug }}" href="{{ route('pieza', $m->slug) }}">
           <div class="num">Модуль {{ $m->position }}</div>
           <div class="tit">{{ $m->title_es }}</div>
           <div class="sub">{{ $m->title_ru }}</div>
@@ -42,4 +50,9 @@
   @endforeach
 
 </div>
+
+<script type="application/json" id="camino-datos">@json($camino)</script>
+@push('js')
+  <script src="/js/camino.js?v={{ @filemtime(public_path('js/camino.js')) ?: 1 }}" defer></script>
+@endpush
 @endsection
