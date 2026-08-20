@@ -33,6 +33,21 @@
     <h1>{{ $pieza->title_es }}</h1>
     <p class="h1-ru">{{ $pieza->title_ru }}</p>
 
+    {{-- La ilustracion vive en img/piezas/<slug>.webp, en la raiz del
+         subdominio y fuera del repositorio (como el audio). Si el archivo
+         todavia no existe, no se pinta nada: la web funciona igual con las
+         piezas ilustradas a medias. --}}
+    @php
+      $ilustracion = 'img/piezas/' . $pieza->slug . '.webp';
+      $hayIlustracion = file_exists(public_path($ilustracion));
+    @endphp
+    @if ($hayIlustracion)
+      <figure class="ilustracion {{ $pieza->type === 'cuento' ? 'alta' : '' }}">
+        <img src="/{{ $ilustracion }}?v={{ @filemtime(public_path($ilustracion)) ?: 1 }}"
+             alt="" loading="lazy" decoding="async">
+      </figure>
+    @endif
+
     <div class="meta">
       @if ($pieza->duration_min)<span class="chip"><b>{{ $pieza->duration_min }}</b> минут</span>@endif
       @if ($pieza->exercise_count)<span class="chip"><b>{{ $pieza->exercise_count }}</b> упражнений</span>@endif

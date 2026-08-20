@@ -430,3 +430,13 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
   background:var(--cal); border-radius:var(--radio);
 }
 .cierre-bienvenida p{color:var(--gris); margin:.4rem 0 1.2rem}
+
+/* ----------------------------------------------------------- ilustraciones */
+.ilustracion{
+  margin:1.2rem 0 1.4rem; border-radius:var(--radio); overflow:hidden;
+  background:var(--cal); line-height:0;
+}
+.ilustracion img{width:100%; height:auto; display:block}
+/* Los cuentos llevan formato vertical (4:5): se limita la altura para que no
+   empuje el texto fuera de la primera pantalla. */
+.ilustracion.alta{max-width:26rem; margin-left:auto; margin-right:auto}

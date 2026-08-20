@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-#  holaprivet.com - script de despliegue  (v12)
+#  holaprivet.com - script de despliegue  (v13)
 #
 #  Particularidades de este hosting que condicionan el script:
 #    - proc_open esta desactivado  -> Composer no puede ejecutar scripts
@@ -21,7 +21,7 @@ COMPOSER="$PHP -d memory_limit=-1 $TOOLS/composer.phar"
 
 exec > "$LOG" 2>&1
 echo "==========================================================="
-echo " DESPLIEGUE v12   $(date)"
+echo " DESPLIEGUE v13   $(date)"
 echo "==========================================================="
 
 paso ()  { echo; echo "----- $1 -----"; }
