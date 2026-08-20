@@ -38,12 +38,17 @@
          todavia no existe, no se pinta nada: la web funciona igual con las
          piezas ilustradas a medias. --}}
     @php
+      // La imagen vive en la raiz REAL del subdominio (donde el despliegue
+      // copia public/ y donde se sube img/), no en app/public: en este
+      // hosting son carpetas distintas. DOCUMENT_ROOT es la que se sirve.
       $ilustracion = 'img/piezas/' . $pieza->slug . '.webp';
-      $hayIlustracion = file_exists(public_path($ilustracion));
+      $raiz = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') ?: public_path();
+      $fisica = $raiz . '/' . $ilustracion;
+      $hayIlustracion = is_file($fisica);
     @endphp
     @if ($hayIlustracion)
       <figure class="ilustracion {{ $pieza->type === 'cuento' ? 'alta' : '' }}">
-        <img src="/{{ $ilustracion }}?v={{ @filemtime(public_path($ilustracion)) ?: 1 }}"
+        <img src="/{{ $ilustracion }}?v={{ @filemtime($fisica) ?: 1 }}"
              alt="" loading="lazy" decoding="async">
       </figure>
     @endif
