@@ -85,6 +85,17 @@ def hash_de(t):
     return hashlib.sha1(normalizar(t).encode('utf-8')).hexdigest()
 
 
+def texto_para_voz(t):
+    """Lo que se ENVIA a la voz (el hash sigue siendo el del texto original).
+
+    «nuevo / nueva» se leia «nuevo barra diagonal nueva»: la barra se
+    convierte en punto, que la voz interpreta como una pausa natural.
+    """
+    t = re.sub(r'\s*/\s*', '. ', t)
+    t = re.sub(r'\s+', ' ', t).strip()
+    return t
+
+
 def separar(bruto):
     m = re.match(r'^---\n(.*?)\n---\n?(.*)$', bruto, re.S)
     if not m:
@@ -272,6 +283,10 @@ def inventario(carpeta, nivel=None, sin_fragmentos=False):
               'fragmentos': 0, 'cuentos': 0}
 
     def apunta(texto, voz, categoria, forzar=False):
+        # Sin letras ni numeros no hay nada que pronunciar («…», «—»):
+        # esos fragmentos se quedan mudos a proposito.
+        if not re.search(r'[A-Za-z\u00C0-\u024F0-9]', texto):
+            return
         h = hash_de(texto)
         if h in tareas and not forzar:
             return
@@ -329,31 +344,56 @@ def inventario(carpeta, nivel=None, sin_fragmentos=False):
 async def genera_uno(sem, texto, voz, rate, ruta):
     import edge_tts
     async with sem:
-        for intento in (1, 2, 3):
+        # Un respiro entre peticiones: el servicio frena a quien no lo da,
+        # y entonces empieza a devolver audio VACIO (archivos de 0 bytes).
+        await asyncio.sleep(0.25)
+
+        for intento in (1, 2, 3, 4):
             try:
                 await edge_tts.Communicate(texto, voz, rate=rate).save(ruta)
-                return True
+
+                # Un mp3 real de una palabra ya pesa varios KB: si pesa menos,
+                # el servicio nos ha frenado y esto no vale.
+                if os.path.getsize(ruta) > 1000:
+                    return True
+                os.remove(ruta)
+                raise RuntimeError('respuesta vacia (frenado del servicio)')
+
             except Exception:
-                if voz in RESERVA:
-                    voz = RESERVA[voz]
+                try:
+                    if os.path.exists(ruta) and os.path.getsize(ruta) == 0:
+                        os.remove(ruta)
+                except OSError:
+                    pass
+
+                if intento == 3 and voz in RESERVA:
+                    voz = RESERVA[voz]      # ultima carta: la voz de reserva
                     continue
-                if intento == 3:
+                if intento == 4:
                     return False
-                await asyncio.sleep(2 * intento)
+                # Esperar de verdad: el frenado se pasa solo en unos segundos
+                await asyncio.sleep(6 * intento)
 
 
-async def genera_todo(tareas, narraciones, salida, prueba=False):
-    sem = os.makedirs(salida, exist_ok=True) or asyncio.Semaphore(6)
+async def genera_todo(tareas, narraciones, salida, prueba=False,
+                      rehacer_barras=False):
+    # 4 a la vez y con pausa: mas lento, pero el servicio no nos frena.
+    sem = os.makedirs(salida, exist_ok=True) or asyncio.Semaphore(4)
     pendientes, saltados = [], 0
 
     for h, (texto, voz, rate, _) in tareas.items():
         carpeta = os.path.join(salida, h[:2])
         os.makedirs(carpeta, exist_ok=True)
         ruta = os.path.join(carpeta, h + '.mp3')
-        if os.path.exists(ruta) and os.path.getsize(ruta) > 0:
-            saltados += 1
-            continue
-        pendientes.append((texto, voz, rate, ruta))
+        if os.path.exists(ruta):
+            if rehacer_barras and '/' in texto:
+                os.remove(ruta)      # se genero diciendo «barra diagonal»
+            elif os.path.getsize(ruta) > 0:
+                saltados += 1
+                continue
+            else:
+                os.remove(ruta)      # vacio de una corrida frenada: se rehace
+        pendientes.append((texto_para_voz(texto), voz, rate, ruta))
 
     os.makedirs(os.path.join(salida, 'cuentos'), exist_ok=True)
     for pid, texto in narraciones:
@@ -361,7 +401,7 @@ async def genera_todo(tareas, narraciones, salida, prueba=False):
         if os.path.exists(ruta) and os.path.getsize(ruta) > 0:
             saltados += 1
             continue
-        pendientes.append((texto, NARRADORA[0], NARRADORA[1], ruta))
+        pendientes.append((texto_para_voz(texto), NARRADORA[0], NARRADORA[1], ruta))
 
     if prueba:
         pendientes = pendientes[:12]
@@ -378,14 +418,17 @@ async def genera_todo(tareas, narraciones, salida, prueba=False):
             if ok:
                 hechos += 1
             else:
-                errores.append(ruta)
+                errores.append((ruta, v, t))
         print(f'  {hechos + len(errores)} / {len(pendientes)}')
 
     print(f'\nGenerados: {hechos} · errores: {len(errores)}')
     if errores:
-        print('Fallaron (relanza el script y se reintentan):')
-        for e in errores[:10]:
-            print('  -', e)
+        with open('errores-audio.txt', 'w', encoding='utf-8') as fh:
+            for ruta, v, txt in errores:
+                fh.write(f'{os.path.basename(ruta)}\t{v}\t{txt}\n')
+        print(f'La lista completa, con el texto de cada uno, esta en '
+              f'errores-audio.txt ({len(errores)} lineas). Si al relanzar '
+              f'fallan siempre los mismos, pasa ese archivo para revisarlos.')
 
     total = 0
     for raiz, _, archivos in os.walk(salida):
@@ -407,6 +450,9 @@ def main():
                     help='solo contar, sin generar (no requiere edge-tts)')
     ap.add_argument('--prueba', action='store_true',
                     help='genera solo 12 archivos para oir las voces')
+    ap.add_argument('--rehacer-barras', action='store_true',
+                    help='regenera los audios cuyo texto lleva «/» (antes '
+                         'se leia «barra diagonal»; ahora es una pausa)')
     args = ap.parse_args()
 
     tareas, narraciones, cuenta = inventario(
@@ -426,7 +472,8 @@ def main():
     except ImportError:
         sys.exit('Falta edge-tts. Instalalo con:  pip install edge-tts')
 
-    asyncio.run(genera_todo(tareas, narraciones, args.salida, args.prueba))
+    asyncio.run(genera_todo(tareas, narraciones, args.salida, args.prueba,
+                            args.rehacer_barras))
 
 
 if __name__ == '__main__':

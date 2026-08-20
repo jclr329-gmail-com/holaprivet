@@ -9,7 +9,29 @@ use App\Support\Markdown;
 class CursoController extends Controller
 {
     /** Portada: los tres niveles y la biblioteca. */
-    public function portada()
+    /** La puerta: bienvenida para quien no ha entrado, el camino para quien si. */
+    public function inicio()
+    {
+        return auth()->check() ? $this->portada() : $this->bienvenida();
+    }
+
+    /** El camino, accesible tambien sin cuenta («смотреть без регистрации»). */
+    public function curso()
+    {
+        return $this->portada();
+    }
+
+    protected function bienvenida()
+    {
+        return view('bienvenida', [
+            'modulos'    => Piece::where('type', 'modulo')->count(),
+            'fichas'     => Piece::whereIn('type', ['ficha_ojo', 'ficha_practica'])->count(),
+            'cuentos'    => Piece::where('type', 'cuento')->count(),
+            'ejercicios' => Exercise::count(),
+        ]);
+    }
+
+    protected function portada()
     {
         $niveles = [];
 

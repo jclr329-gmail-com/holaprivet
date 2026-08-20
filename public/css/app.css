@@ -366,3 +366,67 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
 }
 .oir.en-marcha{background:var(--azul); color:#fff}
 .oir.en-marcha svg{transform:none}
+
+/* ----------------------------------------------------------------- cuenta */
+.quien-soy{color:var(--gris); font-size:.9rem; margin-left:.6rem}
+.forma-salir{display:inline; margin:0}
+.forma-salir button{
+  font:inherit; font-size:.9rem; color:var(--gris-suave); background:none;
+  border:none; cursor:pointer; padding:0; margin-left:.6rem;
+}
+.forma-salir button:hover{color:var(--rojo)}
+.entrar-enlace{font-weight:700}
+
+.aviso{
+  max-width:var(--col); margin:1rem auto 0; padding:.6rem 1rem;
+  background:#FBF3E4; border:1px solid #EAD9B8; border-radius:var(--radio);
+  color:#7A5A22; font-size:.92rem;
+}
+.aviso a{color:inherit}
+.aviso.bien-aviso{background:#EAF3EE; border-color:#BFD8CB; color:var(--verde)}
+
+.ancho.estrecho{max-width:26rem}
+.titulo-cuenta{margin-bottom:.3rem}
+.sub-cuenta{color:var(--gris); margin:.3rem 0 1rem}
+
+.forma{display:flex; flex-direction:column; gap:.9rem; margin:1rem 0}
+.forma label{display:flex; flex-direction:column; gap:.3rem; font-size:.92rem; color:var(--gris)}
+.forma label .pista{color:var(--gris-suave); font-weight:400}
+.forma input{
+  font:inherit; padding:.55rem .8rem; border:1.5px solid var(--linea);
+  border-radius:var(--radio); background:var(--papel); color:var(--tinta);
+}
+.forma input:focus{outline:none; border-color:var(--azul)}
+.forma .fallo{color:var(--rojo); font-size:.9rem; margin:0}
+
+.boton{
+  display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+  font:inherit; font-weight:700; color:#fff; background:var(--azul);
+  border:none; border-radius:99px; padding:.6rem 1.5rem; cursor:pointer;
+  text-decoration:none;
+}
+.boton:hover{background:#17466B}
+.boton.claro{background:var(--azul-claro); color:var(--azul)}
+.boton.claro:hover{background:#CFE0ED}
+.boton.google{background:var(--papel); color:var(--tinta); border:1.5px solid var(--linea); width:100%}
+.boton.google:hover{border-color:var(--azul); background:var(--papel)}
+
+.o-bien{
+  display:flex; align-items:center; gap:.8rem; color:var(--gris-suave);
+  font-size:.85rem; margin:1.1rem 0;
+}
+.o-bien::before,.o-bien::after{content:""; flex:1; height:1px; background:var(--linea)}
+.pie-forma{color:var(--gris); font-size:.92rem}
+
+.cta{display:flex; align-items:center; gap:.9rem; flex-wrap:wrap; margin:1.2rem 0 .4rem}
+.enlace-suave{color:var(--gris); font-size:.95rem}
+.nota-cta{color:var(--gris-suave); font-size:.88rem; margin:.2rem 0 1.4rem}
+.tarjeta.quieta{cursor:default}
+.tarjeta.quieta:hover{transform:none}
+.rejilla.dos{display:grid; grid-template-columns:repeat(2,1fr); gap:1rem}
+@media(max-width:640px){.rejilla.dos{grid-template-columns:1fr}}
+.cierre-bienvenida{
+  text-align:center; margin:3rem 0 1rem; padding:2rem 1.5rem;
+  background:var(--cal); border-radius:var(--radio);
+}
+.cierre-bienvenida p{color:var(--gris); margin:.4rem 0 1.2rem}

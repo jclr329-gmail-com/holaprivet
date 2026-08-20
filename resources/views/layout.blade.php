@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<meta name="csrf" content="{{ csrf_token() }}">
 <title>@yield('titulo', 'holaprivet') · holaprivet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +13,7 @@
      CSS invalida la cache de los navegadores sin acordarse de nada. --}}
 <link rel="stylesheet" href="/css/app.css?v={{ @filemtime(public_path('css/app.css')) ?: 1 }}">
 </head>
-<body>
+<body data-usuario="{{ auth()->check() ? '1' : '' }}">
 
 <header class="barra">
   <div class="barra-in">
@@ -20,9 +21,28 @@
     <nav>
       <a href="{{ route('portada') }}" class="{{ request()->is('/') || request()->is('nivel/*') ? 'act' : '' }}">Курс</a>
       <a href="{{ route('fichas') }}"  class="{{ request()->is('fichas') ? 'act' : '' }}">Карточки</a>
+      @auth
+        <span class="quien-soy" title="{{ auth()->user()->email }}">{{ \Illuminate\Support\Str::before(auth()->user()->name, ' ') }}</span>
+        <form method="POST" action="{{ route('salir') }}" class="forma-salir">
+          @csrf
+          <button type="submit">Выйти</button>
+        </form>
+      @else
+        <a href="{{ route('login') }}" class="entrar-enlace {{ request()->is('entrar') ? 'act' : '' }}">Войти</a>
+      @endauth
     </nav>
   </div>
 </header>
+
+@if (session('estado'))
+  <div class="aviso bien-aviso">{{ session('estado') }}</div>
+@endif
+@auth
+  @if (! auth()->user()->hasVerifiedEmail())
+    <div class="aviso">Подтвердите почту, чтобы прогресс сохранялся в аккаунте —
+    письмо уже у вас. <a href="{{ route('verification.notice') }}">Подробнее</a></div>
+  @endif
+@endauth
 
 @yield('cuerpo')
 
@@ -34,6 +54,9 @@
 </footer>
 
 <script src="/js/audio.js?v={{ @filemtime(public_path('js/audio.js')) ?: 1 }}" defer></script>
+@auth
+<script src="/js/cuenta.js?v={{ @filemtime(public_path('js/cuenta.js')) ?: 1 }}" defer></script>
+@endauth
 @stack('js')
 </body>
 </html>

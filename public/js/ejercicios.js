@@ -107,6 +107,7 @@
       guardar();
       pintar(ej, estado[n]);
       actualizar();
+      if (window.hpSync) window.hpSync.subir(raiz.getAttribute('data-pieza'));
       return;
     }
 
@@ -125,6 +126,7 @@
       });
 
       actualizar();
+      if (window.hpSync) window.hpSync.subir(raiz.getAttribute('data-pieza'));
       raiz.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });

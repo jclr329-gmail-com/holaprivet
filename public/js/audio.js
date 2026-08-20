@@ -113,7 +113,7 @@
 
         a.addEventListener('ended', function () {
           el.classList.remove('sonando');
-          setTimeout(function () { if (enMarcha) paso(); }, 350);
+          setTimeout(function () { if (enMarcha) paso(); }, 120);
         });
         a.addEventListener('error', function () {
           rotos[h] = true;
