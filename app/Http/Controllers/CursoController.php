@@ -17,11 +17,14 @@ class CursoController extends Controller
 
         $descargables = collect(config('recursos.descargables'))
             ->map(function ($d) use ($raiz) {
-                $fisica = $raiz . '/recursos/' . $d['archivo'];
+                // La carpeta fisica se llama «descargas»: si se llamara
+                // «recursos», Apache la serviria ANTES de dejar que Laravel
+                // pinte la pagina /recursos, y devolveria un 403.
+                $fisica = $raiz . '/descargas/' . $d['archivo'];
                 if (! is_file($fisica)) {
                     return null;             // aun sin subir: no se pinta
                 }
-                $d['url']  = '/recursos/' . $d['archivo'];
+                $d['url']  = '/descargas/' . $d['archivo'];
                 $d['peso'] = round(filesize($fisica) / 1024 / 1024, 1);
 
                 return $d;
