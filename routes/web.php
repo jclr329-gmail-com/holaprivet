@@ -12,6 +12,7 @@ Route::get('/',          [CursoController::class, 'inicio'])->name('portada');
 Route::get('/curso',     [CursoController::class, 'curso'])->name('curso');
 Route::get('/nivel/{n}', [CursoController::class, 'nivel'])->whereNumber('n')->name('nivel');
 Route::get('/fichas',    [CursoController::class, 'fichas'])->name('fichas');
+Route::get('/recursos',  [CursoController::class, 'recursos'])->name('recursos');
 Route::get('/p/{slug}',  [CursoController::class, 'pieza'])->name('pieza');
 
 // ----------------------------------------------------------------- cuenta

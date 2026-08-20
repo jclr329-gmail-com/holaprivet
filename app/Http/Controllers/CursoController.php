@@ -9,6 +9,32 @@ use App\Support\Markdown;
 class CursoController extends Controller
 {
     /** Portada: los tres niveles y la biblioteca. */
+    /** Materiales descargables y enlaces externos. */
+    public function recursos()
+    {
+        // La carpeta servida de verdad, no app/public (leccion del hito 8).
+        $raiz = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') ?: public_path();
+
+        $descargables = collect(config('recursos.descargables'))
+            ->map(function ($d) use ($raiz) {
+                $fisica = $raiz . '/recursos/' . $d['archivo'];
+                if (! is_file($fisica)) {
+                    return null;             // aun sin subir: no se pinta
+                }
+                $d['url']  = '/recursos/' . $d['archivo'];
+                $d['peso'] = round(filesize($fisica) / 1024 / 1024, 1);
+
+                return $d;
+            })
+            ->filter()
+            ->values();
+
+        return view('recursos', [
+            'descargables' => $descargables,
+            'enlaces'      => config('recursos.enlaces'),
+        ]);
+    }
+
     /** La puerta: bienvenida para quien no ha entrado, el camino para quien si. */
     public function inicio()
     {

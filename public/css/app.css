@@ -440,3 +440,15 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
 /* Los cuentos llevan formato vertical (4:5): se limita la altura para que no
    empuje el texto fuera de la primera pantalla. */
 .ilustracion.alta{max-width:26rem; margin-left:auto; margin-right:auto}
+
+/* --------------------------------------------------------------- recursos */
+.tarjeta.recurso{position:relative; padding-right:3.4rem}
+.pdf-marca{
+  position:absolute; top:1rem; right:1rem;
+  font-size:.68rem; font-weight:700; letter-spacing:.06em;
+  color:var(--rojo); border:1.5px solid currentColor;
+  border-radius:5px; padding:.1rem .38rem;
+}
+.recurso-pie{margin-top:.6rem; font-size:.85rem; font-weight:700; color:var(--azul)}
+.recurso .fuera{color:var(--gris-suave); font-size:.85em}
+.recursos-vacio{color:var(--gris); margin:1rem 0 2rem}
