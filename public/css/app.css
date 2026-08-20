@@ -358,3 +358,11 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
 
 .tarjeta.futura{opacity:.55}
 .tarjeta.futura:hover{opacity:1}
+
+/* ------------------------------------------------------------------ audio */
+.es.sonando, .es.lisa.sonando{
+  background:var(--azul-claro); border-radius:4px;
+  box-shadow:0 0 0 3px var(--azul-claro);
+}
+.oir.en-marcha{background:var(--azul); color:#fff}
+.oir.en-marcha svg{transform:none}

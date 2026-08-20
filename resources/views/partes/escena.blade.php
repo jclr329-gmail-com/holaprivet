@@ -7,7 +7,8 @@
         {{ $pieza->lines->firstWhere('is_break', true)?->stage_note_ru ?? 'Сцена' }}
       @endif
     </span>
-    <button class="oir" type="button">
+    <button class="oir" type="button"
+            @if ($esCuento) data-cuento="{{ $pieza->slug }}" @endif>
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
       Слушать
     </button>
@@ -20,9 +21,9 @@
     <div class="relato">
       @foreach ($pieza->lines as $l)
         @if ($l->stage_note_ru === 'cita')
-          <blockquote class="nota-cuento"><span class="es lisa">{{ $l->text_es }}</span></blockquote>
+          <blockquote class="nota-cuento"><span class="es lisa" data-audio="{{ \App\Support\Refs::audio($l->text_es) }}">{{ $l->text_es }}</span></blockquote>
         @else
-          <p><span class="es lisa">{{ $l->text_es }}</span></p>
+          <p><span class="es lisa" data-audio="{{ \App\Support\Refs::audio($l->text_es) }}">{{ $l->text_es }}</span></p>
           @if ($l->text_ru)<p class="ru trad">{{ $l->text_ru }}</p>@endif
         @endif
       @endforeach
@@ -38,7 +39,7 @@
               {{ $l->character }}
               @if ($l->stage_note_ru)<span class="acota">{{ $l->stage_note_ru }}</span>@endif
             </div>
-            <div class="dice"><span class="es">{{ $l->text_es }}</span></div>
+            <div class="dice"><span class="es" data-audio="{{ \App\Support\Refs::audio($l->text_es) }}">{{ $l->text_es }}</span></div>
           </div>
         @endif
       @endforeach

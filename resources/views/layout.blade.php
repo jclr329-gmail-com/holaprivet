@@ -33,22 +33,7 @@
   </div>
 </footer>
 
-<script>
-// Cada fragmento en espanol podra reproducirse cuando existan los audios.
-// De momento solo se resalta, para que la interaccion ya este en su sitio.
-document.querySelectorAll('.es').forEach(function (el) {
-  var sonar = function () {
-    el.classList.add('son');
-    setTimeout(function () { el.classList.remove('son'); }, 900);
-  };
-  el.addEventListener('mouseenter', sonar);
-  el.addEventListener('click', sonar);
-  el.tabIndex = 0;
-  el.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sonar(); }
-  });
-});
-</script>
+<script src="/js/audio.js?v={{ @filemtime(public_path('js/audio.js')) ?: 1 }}" defer></script>
 @stack('js')
 </body>
 </html>

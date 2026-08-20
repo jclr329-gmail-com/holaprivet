@@ -15,7 +15,7 @@
       <ul class="voces">
         @foreach ($voces as $v)
           <li>
-            <span><span class="es">{{ $v->term_es }}</span></span>
+            <span><span class="es" data-audio="{{ \App\Support\Refs::audio($v->term_es) }}">{{ $v->term_es }}</span></span>
             <span class="rus">
               {{ $v->term_ru }}
               @if ($v->seen_in_slug)

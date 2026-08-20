@@ -254,10 +254,10 @@ class Markdown
 
         // Si lleva una acotacion en cursiva, se deja fuera del audio
         if (preg_match('/^(.*?)\s*\*\((.+?)\)\*\s*$/u', $limpio, $m)) {
-            return '<span class="es">' . e(trim($m[1])) . '</span> <em>(' . e($m[2]) . ')</em>';
+            return '<span class="es" data-audio="' . Refs::audio($m[1]) . '">' . e(trim($m[1])) . '</span> <em>(' . e($m[2]) . ')</em>';
         }
 
-        return '<span class="es">' . e($limpio) . '</span>';
+        return '<span class="es" data-audio="' . Refs::audio($limpio) . '">' . e($limpio) . '</span>';
     }
 
     // ----------------------------------------------------------------- util
