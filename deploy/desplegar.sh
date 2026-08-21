@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-#  holaprivet.com - script de despliegue  (v17)
+#  holaprivet.com - script de despliegue  (v18)
 #
 #  Particularidades de este hosting que condicionan el script:
 #    - proc_open esta desactivado  -> Composer no puede ejecutar scripts
@@ -11,17 +11,23 @@
 # ===========================================================================
 
 VHOST=/var/www/vhosts/41580813.servicio-online.net
-SUB=$VHOST/beta.holaprivet.com
-APP=$SUB/app
+
+# El script vive en <docroot>/app/deploy/: de ahi deduce su casa. El MISMO
+# script sirve a la beta y a produccion; lo unico que cambia es el .env.
+APP=$(cd "$(dirname "$0")/.." && pwd)
+SUB=$(dirname "$APP")
 TOOLS=$SUB/.tools
-ENVFILE=$VHOST/private/beta.env
+case "$SUB" in
+  *beta.holaprivet.com*) ENVFILE=$VHOST/private/beta.env ; ENTORNO=beta ;;
+  *)                     ENVFILE=$VHOST/private/prod.env ; ENTORNO=produccion ;;
+esac
 LOG=$SUB/despliegue.log
 PHP=/usr/bin/php
 COMPOSER="$PHP -d memory_limit=-1 $TOOLS/composer.phar"
 
 exec > "$LOG" 2>&1
 echo "==========================================================="
-echo " DESPLIEGUE v17   $(date)"
+echo " DESPLIEGUE v18 ($ENTORNO)   $(date)"
 echo "==========================================================="
 
 paso ()  { echo; echo "----- $1 -----"; }
