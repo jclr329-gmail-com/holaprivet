@@ -72,7 +72,7 @@
   </p>
 
   <p class="nosotros-firma">Con gratitud · С благодарностью<br>
-  <b>Carlos Liñán</b> · Sevilla</p>
+  <b>Carlos Liñán</b> · Málaga</p>
   </div>
 
 </div>
