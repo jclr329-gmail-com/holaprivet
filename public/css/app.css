@@ -517,3 +517,11 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
 .ladrillo.especial .pal{font-size:1.15rem; color:var(--ambar)}
 .ladrillo.ocupada.especial{background:#FBF5EA}
 .muro-pie{color:var(--gris-suave); font-size:.85rem}
+
+/* ------------------------------------------------- nosotros: texto bilingue */
+.bi{line-height:1.9; text-align:justify}
+.bi-es{color:var(--tinta); font-weight:600}
+.bi-ru{color:var(--gris-suave); font-size:.9em}
+.bi a{color:var(--azul)}
+.nosotros-firma{margin-top:1.6rem; color:var(--gris)}
+.nosotros-firma b{font-family:var(--serif); font-size:1.1rem; color:var(--tinta)}
