@@ -51,7 +51,7 @@ class SembrarMuro extends Command
                 'word'           => $v->es,
                 'translation_ru' => mb_substr($v->ru, 0, 80),
                 'kind'           => $especial ? 'especial' : 'normal',
-                'price_cents'    => config('muro.precios')[$especial ? 'especial' : 'normal'],
+                'price_cents'    => (int) config($especial ? 'muro.precios.especial' : 'muro.precios.normal', $especial ? 600 : 300),
                 'grid_x'         => $i % 10,
                 'grid_y'         => intdiv($i, 10),
                 'grid_w'         => $especial ? 2 : 1,

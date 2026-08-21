@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-#  holaprivet.com - script de despliegue  (v16)
+#  holaprivet.com - script de despliegue  (v17)
 #
 #  Particularidades de este hosting que condicionan el script:
 #    - proc_open esta desactivado  -> Composer no puede ejecutar scripts
@@ -21,7 +21,7 @@ COMPOSER="$PHP -d memory_limit=-1 $TOOLS/composer.phar"
 
 exec > "$LOG" 2>&1
 echo "==========================================================="
-echo " DESPLIEGUE v16   $(date)"
+echo " DESPLIEGUE v17   $(date)"
 echo "==========================================================="
 
 paso ()  { echo; echo "----- $1 -----"; }
@@ -127,6 +127,9 @@ CLAVE=$(grep -m1 '^APP_KEY=' "$APP/.env" | cut -d= -f2- | tr -d '\r\n "'"'"'')
 
 # --- 8. Base de datos ------------------------------------------------------
 paso "8. Migraciones"
+# La cache de configuracion del despliegue anterior no conoce los config/
+# nuevos: fuera antes de que migraciones y siembras la necesiten.
+$PHP artisan config:clear || true
 $PHP artisan migrate --force || morir "fallaron las migraciones - revisa los datos de la base"
 $PHP artisan muro:sembrar || echo "(el muro se sembrara cuando exista el comando)"
 
