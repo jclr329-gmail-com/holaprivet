@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccesoController;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\GestionController;
 use App\Http\Controllers\ProgresoController;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,7 @@ Route::get('/curso',     [CursoController::class, 'curso'])->name('curso');
 Route::get('/nivel/{n}', [CursoController::class, 'nivel'])->whereNumber('n')->name('nivel');
 Route::get('/fichas',    [CursoController::class, 'fichas'])->name('fichas');
 Route::get('/recursos',  [CursoController::class, 'recursos'])->name('recursos');
+Route::get('/nosotros',  [CursoController::class, 'nosotros'])->name('nosotros');
 Route::get('/p/{slug}',  [CursoController::class, 'pieza'])->name('pieza');
 
 // ----------------------------------------------------------------- cuenta
@@ -45,3 +47,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/progreso',       [ProgresoController::class, 'guardar'])->name('progreso.guardar')
         ->middleware('throttle:60,1');
 });
+
+// -------------------------------------------------------------- gestion
+// Sin enlaces desde la web publica; quien no este en admin_users ve un 404.
+
+Route::middleware(['auth', \App\Http\Middleware\EsAdmin::class])
+    ->prefix('gestion')->name('gestion.')->group(function () {
+        Route::get('/',            [GestionController::class, 'panel'])->name('panel');
+        Route::get('/alumnos',     [GestionController::class, 'alumnos'])->name('alumnos');
+        Route::get('/embudo',      [GestionController::class, 'embudo'])->name('embudo');
+        Route::get('/fallos',      [GestionController::class, 'fallos'])->name('fallos');
+        Route::get('/donaciones',  [GestionController::class, 'donaciones'])->name('donaciones');
+        Route::get('/materiales',  [GestionController::class, 'materiales'])->name('materiales');
+        Route::post('/materiales', [GestionController::class, 'materialGuardar'])->name('materiales.guardar');
+        Route::post('/materiales/borrar', [GestionController::class, 'materialBorrar'])->name('materiales.borrar');
+    });

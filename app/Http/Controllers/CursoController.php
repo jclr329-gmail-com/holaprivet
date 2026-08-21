@@ -15,26 +15,44 @@ class CursoController extends Controller
         // La carpeta servida de verdad, no app/public (leccion del hito 8).
         $raiz = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') ?: public_path();
 
-        $descargables = collect(config('recursos.descargables'))
-            ->map(function ($d) use ($raiz) {
-                // La carpeta fisica se llama «descargas»: si se llamara
-                // «recursos», Apache la serviria ANTES de dejar que Laravel
-                // pinte la pagina /recursos, y devolveria un 403.
-                $fisica = $raiz . '/descargas/' . $d['archivo'];
-                if (! is_file($fisica)) {
+        // Desde el hito 10, los materiales viven en la base de datos y se
+        // administran en /gestion. La carpeta fisica sigue siendo
+        // «descargas» (si se llamara «recursos», Apache la serviria antes
+        // que esta pagina y daria un 403), y el peso se lee del archivo.
+        $todos = \App\Models\Resource::where('visible', true)
+            ->orderBy('orden')->get();
+
+        $descargables = $todos->where('categoria', 'descarga')
+            ->map(function ($r) use ($raiz) {
+                $fisica = $raiz . '/descargas/' . $r->archivo;
+                if (! $r->archivo || ! is_file($fisica)) {
                     return null;             // aun sin subir: no se pinta
                 }
-                $d['url']  = '/descargas/' . $d['archivo'];
-                $d['peso'] = round(filesize($fisica) / 1024 / 1024, 1);
 
-                return $d;
+                return [
+                    'titulo' => $r->titulo,
+                    'nota'   => $r->nota,
+                    'url'    => '/descargas/' . $r->archivo,
+                    'peso'   => round(filesize($fisica) / 1024 / 1024, 1),
+                ];
             })
             ->filter()
             ->values();
 
-        return view('recursos', [
-            'descargables' => $descargables,
-            'enlaces'      => config('recursos.enlaces'),
+        $enlaces = $todos->where('categoria', 'enlace')
+            ->map(fn ($r) => ['url' => $r->url, 'titulo' => $r->titulo, 'nota' => $r->nota])
+            ->values();
+
+        return view('recursos', compact('descargables', 'enlaces'));
+    }
+
+    /** «О нас»: la historia del curso. */
+    public function nosotros()
+    {
+        $raiz = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') ?: public_path();
+
+        return view('nosotros', [
+            'hayFoto' => is_file($raiz . '/img/nosotros.png'),
         ]);
     }
 
@@ -199,6 +217,12 @@ class CursoController extends Controller
      *
      * @return array<int,array{slug:string,url:string,etiqueta:string,titulo:string}>
      */
+    /** El camino, para quien lo necesite desde fuera (el embudo de gestion). */
+    public function caminoPublico(): array
+    {
+        return $this->camino();
+    }
+
     protected function camino(?int $nivel = null): array
     {
         $de = function (string $tipo) use ($nivel) {

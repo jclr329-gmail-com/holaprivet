@@ -452,3 +452,38 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
 .recurso-pie{margin-top:.6rem; font-size:.85rem; font-weight:700; color:var(--azul)}
 .recurso .fuera{color:var(--gris-suave); font-size:.85em}
 .recursos-vacio{color:var(--gris); margin:1rem 0 2rem}
+
+/* ---------------------------------------------------------------- gestion */
+.g-nav{display:flex; gap:.3rem; flex-wrap:wrap; margin:0 0 1.4rem}
+.g-nav a{
+  font-size:.9rem; color:var(--gris); text-decoration:none;
+  padding:.35rem .8rem; border:1.5px solid var(--linea); border-radius:99px;
+}
+.g-nav a.act,.g-nav a:hover{color:var(--azul); border-color:var(--azul)}
+.g-cifras{display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin:1rem 0}
+.g-cifras div{background:var(--papel); border:1px solid var(--linea);
+  border-radius:var(--radio); padding:1rem; text-align:center}
+.g-cifras b{display:block; font-family:var(--serif); font-size:1.8rem; color:var(--azul)}
+.g-cifras span{color:var(--gris); font-size:.85rem}
+.g-nota{color:var(--gris); font-size:.92rem}
+.g-tabla{font-size:.88rem}
+.g-tabla td,.g-tabla th{padding:.4rem .6rem}
+.g-tabla tr.g-mal td{background:#F7ECEC}
+.g-barra{height:8px; background:var(--azul-claro); border-radius:99px;
+  overflow:hidden; margin-bottom:.2rem}
+.g-barra span{display:block; height:100%; background:var(--azul)}
+.g-ok{color:var(--verde); font-weight:700}
+.g-sub{margin-top:2rem}
+.g-forma .g-fila{display:flex; gap:1rem; flex-wrap:wrap}
+.g-forma .g-fila label{flex:1; min-width:8rem}
+.g-forma select{font:inherit; padding:.5rem .6rem; border:1.5px solid var(--linea);
+  border-radius:var(--radio); background:var(--papel)}
+.g-check{flex-direction:row !important; align-items:center; gap:.4rem !important}
+.g-borrar{font:inherit; font-size:.82rem; color:var(--rojo); background:none;
+  border:none; cursor:pointer; padding:0}
+@media(max-width:640px){.g-cifras{grid-template-columns:repeat(2,1fr)}}
+
+/* ---------------------------------------------------------------- nosotros */
+.ancho.estrecho-medio{max-width:34rem}
+.nosotros-foto{margin:0 0 1.5rem; border-radius:var(--radio); overflow:hidden}
+.nosotros-foto img{width:100%; height:auto; display:block}
