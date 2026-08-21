@@ -220,8 +220,12 @@ class Markdown
         $t = preg_replace_callback('/\*\*(.+?)\*\*/u', function ($m) {
             $esEspanol = ! preg_match('/\p{Cyrillic}/u', $m[1])
                          && preg_match('/\p{Latin}/u', $m[1]);
+            // El hash se calcula sobre el texto sin escapar, igual que hace
+            // el generador con el .md: asi el archivo siempre casa.
             return ($this->audio && $esEspanol)
-                ? '<span class="es" lang="es" translate="no">' . $m[1] . '</span>'
+                ? '<span class="es" lang="es" translate="no" data-audio="'
+                    . Refs::audio(html_entity_decode($m[1], ENT_QUOTES)) . '">'
+                    . $m[1] . '</span>'
                 : '<strong>' . $m[1] . '</strong>';
         }, $t);
 
