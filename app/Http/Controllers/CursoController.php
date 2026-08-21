@@ -65,7 +65,15 @@ class CursoController extends Controller
     /** La puerta: bienvenida para quien no ha entrado, el camino para quien si. */
     public function inicio()
     {
-        return auth()->check() ? $this->portada() : $this->bienvenida();
+        // El camino para todos: el invitado ve el curso entero con una banda
+        // de invitacion encima (la portada-escaparate vive en /bienvenida).
+        return $this->portada();
+    }
+
+    /** La presentacion del curso, como pagina propia. */
+    public function presentacion()
+    {
+        return $this->bienvenida();
     }
 
     /** El camino, accesible tambien sin cuenta («смотреть без регистрации»). */

@@ -27,7 +27,7 @@
   <div class="barra-in">
     <a class="marca" href="{{ route('portada') }}">hola<span>privet</span></a>
     <nav>
-      <a href="{{ auth()->check() ? route('portada') : route('curso') }}" class="{{ request()->is('/') || request()->is('curso') || request()->is('nivel/*') ? 'act' : '' }}">Курс</a>
+      <a href="{{ route('portada') }}" class="{{ request()->is('/') || request()->is('curso') || request()->is('nivel/*') ? 'act' : '' }}">Курс</a>
       <a href="{{ route('fichas') }}"  class="{{ request()->is('fichas') ? 'act' : '' }}">Карточки</a>
       <a href="{{ route('recursos') }}" class="{{ request()->is('recursos') ? 'act' : '' }}">Материалы</a>
       <a href="{{ route('muro') }}" class="{{ request()->is('muro*') ? 'act' : '' }}">Стена</a>

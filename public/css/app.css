@@ -525,3 +525,13 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
 .bi a{color:var(--azul)}
 .nosotros-firma{margin-top:1.6rem; color:var(--gris)}
 .nosotros-firma b{font-family:var(--serif); font-size:1.1rem; color:var(--tinta)}
+
+/* ---------------------------------------------------------- banda invitado */
+.banda-invitado{
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  flex-wrap:wrap; margin:1.2rem 0 0; padding:.9rem 1.2rem;
+  background:var(--cal); border:1px solid var(--linea); border-radius:var(--radio);
+}
+.banda-invitado p{margin:0; color:var(--gris); font-size:.95rem; max-width:32rem}
+.banda-botones{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap}
+@media(max-width:640px){.banda-invitado{flex-direction:column; align-items:flex-start}}

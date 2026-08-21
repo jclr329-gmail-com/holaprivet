@@ -4,6 +4,18 @@
 @section('cuerpo')
 <div class="ancho">
 
+  @guest
+    <div class="banda-invitado">
+      <p>Бесплатный курс испанского для русскоговорящих. Аккаунт нужен только
+      для одного: чтобы прогресс сохранялся на любом устройстве.</p>
+      <span class="banda-botones">
+        <a class="boton" href="{{ route('registro') }}">Создать аккаунт</a>
+        <a class="boton claro" href="{{ route('login') }}">Войти</a>
+        <a class="enlace-suave" href="{{ route('bienvenida') }}">Что это за курс? →</a>
+      </span>
+    </div>
+  @endguest
+
   <div class="hero">
     <div class="eyebrow"><span class="pipe"></span> Курс испанского языка</div>
     <h1>Испанский для тех, кто уже здесь живёт</h1>
