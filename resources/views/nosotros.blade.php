@@ -71,6 +71,8 @@
     <span class="bi-es">Gracias por la ayuda y el apoyo.</span> <span class="bi-ru">спасибо за помощь и поддержку.</span>
   </p>
 
+  <p><button class="compartir" type="button" data-compartir>Поделиться курсом ↗</button></p>
+
   <p class="nosotros-firma">Con gratitud · С благодарностью<br>
   <b>Carlos Liñán</b> · Málaga</p>
   </div>

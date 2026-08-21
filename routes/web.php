@@ -18,6 +18,7 @@ Route::get('/nivel/{n}', [CursoController::class, 'nivel'])->whereNumber('n')->n
 Route::get('/fichas',    [CursoController::class, 'fichas'])->name('fichas');
 Route::get('/recursos',  [CursoController::class, 'recursos'])->name('recursos');
 Route::get('/nosotros',  [CursoController::class, 'nosotros'])->name('nosotros');
+Route::get('/offline/manifiesto', [\App\Http\Controllers\OfflineController::class, 'manifiesto'])->name('offline.manifiesto');
 
 // ------------------------------------------------------------------ muro
 Route::get('/muro', [MuroController::class, 'muro'])->name('muro');

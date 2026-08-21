@@ -65,6 +65,7 @@
 </footer>
 
 <script src="/js/audio.js?v={{ @filemtime(public_path('js/audio.js')) ?: 1 }}" defer></script>
+<script src="/js/compartir.js?v={{ @filemtime(public_path('js/compartir.js')) ?: 1 }}" defer></script>
 @auth
 <script src="/js/cuenta.js?v={{ @filemtime(public_path('js/cuenta.js')) ?: 1 }}" defer></script>
 @endauth

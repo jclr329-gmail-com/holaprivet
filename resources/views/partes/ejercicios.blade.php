@@ -8,6 +8,39 @@
   <p class="ej-como">Выберите вариант — объяснение появится сразу. Ответы
   сохраняются в этом браузере, можно уйти и вернуться.</p>
 
+  {{-- Los enunciados van en espanol y usan palabras que quiza aun no se han
+       estudiado: esta chuleta, curada por frecuencia real, cubre casi todas. --}}
+  <details class="chuleta">
+    <summary>Слова в заданиях — шпаргалка</summary>
+    <div class="chuleta-rejilla">
+      @foreach ([
+        ['¿Qué significa…?', 'что означает…?'],
+        ['¿Cómo se dice…?', 'как сказать…?'],
+        ['¿Cómo se pronuncia…?', 'как произносится…?'],
+        ['la palabra', 'слово'],
+        ['la frase', 'фраза'],
+        ['la pregunta', 'вопрос'],
+        ['la respuesta', 'ответ'],
+        ['la forma correcta', 'правильная форма'],
+        ['¿Cuál…?', 'какой / который…?'],
+        ['Elige…', 'выберите…'],
+        ['Completa…', 'дополните…'],
+        ['falta', 'не хватает, пропущено'],
+        ['el verbo', 'глагол'],
+        ['el número', 'число'],
+        ['el orden', 'порядок (слов)'],
+        ['la traducción', 'перевод'],
+        ['verdadero / falso', 'верно / неверно'],
+        ['según…', 'согласно…, по…'],
+      ] as $par)
+        <div class="chuleta-par">
+          <span lang="es" translate="no">{{ $par[0] }}</span>
+          <span class="chuleta-ru">{{ $par[1] }}</span>
+        </div>
+      @endforeach
+    </div>
+  </details>
+
   <noscript>
     <p class="ej-como">Для интерактивных упражнений нужен JavaScript. Сейчас он
     выключен, поэтому упражнения ниже — только для чтения.</p>

@@ -29,6 +29,9 @@
       <span class="c-flecha" aria-hidden="true">→</span>
     </a>
 
+    <button class="compartir" type="button" data-compartir
+            title="Поделиться курсом">Поделиться курсом ↗</button>
+
     <div class="cifras">
       <div><b>{{ $modulos }}</b> модулей</div>
       <div><b>{{ $cuentos }}</b> рассказов</div>

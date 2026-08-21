@@ -21,6 +21,7 @@ const V = new URL(self.location.href).searchParams.get('v') || '1';
 const ESQUELETO = 'hp-esqueleto-' + V;
 const MEDIOS = 'hp-medios';           // sobrevive a las versiones
 const PAGINAS = 'hp-paginas-' + V;
+const FIJAS = 'hp-fijas';              // la descarga completa: sobrevive
 
 self.addEventListener('install', function (e) {
   self.skipWaiting();
@@ -30,7 +31,7 @@ self.addEventListener('activate', function (e) {
   e.waitUntil((async function () {
     const nombres = await caches.keys();
     await Promise.all(nombres.map(function (n) {
-      const viva = n === ESQUELETO || n === MEDIOS || n === PAGINAS;
+      const viva = n === ESQUELETO || n === MEDIOS || n === PAGINAS || n === FIJAS;
       return viva ? null : caches.delete(n);
     }));
     await self.clients.claim();
@@ -65,7 +66,14 @@ self.addEventListener('fetch', function (e) {
       const red = fetch(pet).then(function (r) {
         if (r.ok) cache.put(pet, r.clone());
         return r;
-      }).catch(function () { return guardado; });
+      }).catch(async function () {
+        // sin red y sin version exacta: vale la copia de la descarga
+        // completa aunque su ?v sea de otro despliegue
+        const fijas = await caches.open(FIJAS);
+        return guardado
+          || await fijas.match(pet, { ignoreSearch: true })
+          || await cache.match(pet, { ignoreSearch: true });
+      });
       return guardado || red;
     })());
     return;
@@ -82,6 +90,9 @@ self.addEventListener('fetch', function (e) {
       } catch (err) {
         const guardado = await cache.match(pet);
         if (guardado) return guardado;
+        const fijas = await caches.open(FIJAS);
+        const fijo = await fijas.match(pet);
+        if (fijo) return fijo;
         throw err;
       }
     })());

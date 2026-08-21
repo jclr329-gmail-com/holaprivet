@@ -89,6 +89,7 @@
     <p>Первый модуль занимает полчаса. К его концу вы поздороваетесь по-испански
     — и вам ответят.</p>
     <a class="boton" href="{{ route('registro') }}">Начать курс</a>
+    <button class="compartir" type="button" data-compartir>Поделиться курсом ↗</button>
   </div>
 
 </div>

@@ -27,6 +27,20 @@
   @endif
 
   <div class="nivel-cab">
+    <div class="n">Офлайн-режим</div>
+    <h2>Скачать курс целиком — и учиться в метро</h2>
+  </div>
+
+  <div id="zona-offline" class="tarjeta quieta zona-offline">
+    <p class="sub">Весь курс — тексты, звук, картинки — сохранится в этом
+    браузере и будет работать без интернета. Это большая загрузка (сотни
+    мегабайт): лучше по Wi-Fi. Позже той же кнопкой можно докачать новое.</p>
+    <button class="boton" type="button" data-offline-boton>Скачать курс целиком</button>
+    <progress hidden></progress>
+    <p class="sub" data-offline-texto></p>
+  </div>
+
+  <div class="nivel-cab">
     <div class="n">Полезное в сети</div>
     <h2>Проверенные внешние ресурсы</h2>
     <p>Немного, но по делу: то, чем мы сами пользуемся каждый день.</p>
@@ -43,3 +57,7 @@
 
 </div>
 @endsection
+
+@push('js')
+<script src="/js/offline.js?v={{ @filemtime(public_path('js/offline.js')) ?: 1 }}" defer></script>
+@endpush
