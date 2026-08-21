@@ -178,6 +178,10 @@ paso "10. Publicacion"
 cp -rf "$APP/public/." "$SUB/" || morir "no se pudo publicar la carpeta public"
 cp -f  "$APP/deploy/htaccess" "$SUB/.htaccess" || morir "no se pudo copiar el .htaccess"
 rm -f "$SUB/index.html"
+# La beta no se indexa; produccion si (el archivo del repo trae el cierre).
+if [ "$ENTORNO" = "produccion" ]; then
+    printf 'User-agent: *\nAllow: /\n' > "$SUB/robots.txt"
+fi
 echo "Publicado:"
 ls -la "$SUB" | grep -E 'index.php|htaccess|robots|css'
 
