@@ -17,12 +17,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Re-ejecutable: la primera corrida creo las tablas y fallo en la
+        // siembra, asi que aqui no se da nada por hecho.
+        if (! Schema::hasTable('admin_users'))
         Schema::create('admin_users', function (Blueprint $table) {
             $table->id();
             $table->string('email', 190)->unique();
             $table->timestamps();
         });
 
+        if (! Schema::hasTable('resources'))
         Schema::create('resources', function (Blueprint $table) {
             $table->id();
             $table->enum('categoria', ['descarga', 'enlace']);
@@ -38,14 +42,20 @@ return new class extends Migration
         });
 
         // Siembra: lo que hoy vive en config/recursos.php
+        if (DB::table('resources')->count() > 0) {
+            return;                       // ya sembrada en otra corrida
+        }
+
         $ahora = now();
         $d = fn ($o, $archivo, $titulo, $nota) => [
-            'categoria' => 'descarga', 'tipo' => 'pdf', 'archivo' => $archivo,
+            'categoria' => 'descarga', 'tipo' => 'pdf',
+            'archivo' => $archivo, 'url' => null,
             'titulo' => $titulo, 'nota' => $nota, 'orden' => $o,
             'created_at' => $ahora, 'updated_at' => $ahora,
         ];
         $e = fn ($o, $url, $titulo, $nota) => [
-            'categoria' => 'enlace', 'tipo' => 'enlace', 'url' => $url,
+            'categoria' => 'enlace', 'tipo' => 'enlace',
+            'archivo' => null, 'url' => $url,
             'titulo' => $titulo, 'nota' => $nota, 'orden' => $o,
             'created_at' => $ahora, 'updated_at' => $ahora,
         ];
