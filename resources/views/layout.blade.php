@@ -3,7 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+@if (str_contains(config('app.url'), '//beta.'))
 <meta name="robots" content="noindex, nofollow">
+@endif
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1F5C8B">
+<link rel="apple-touch-icon" href="/img/icono-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="holaprivet">
 <meta name="csrf" content="{{ csrf_token() }}">
 <title>@yield('titulo', 'holaprivet') · holaprivet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -60,6 +68,11 @@
 @auth
 <script src="/js/cuenta.js?v={{ @filemtime(public_path('js/cuenta.js')) ?: 1 }}" defer></script>
 @endauth
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js?v={{ @filemtime(public_path('sw.js')) ?: 1 }}');
+}
+</script>
 @stack('js')
 </body>
 </html>

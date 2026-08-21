@@ -1,0 +1,16 @@
+{
+  "name": "holaprivet — испанский для жизни в Испании",
+  "short_name": "holaprivet",
+  "description": "Бесплатный курс испанского для русскоговорящих: сцены из жизни, аудио, упражнения.",
+  "lang": "ru",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1F5C8B",
+  "icons": [
+    { "src": "/img/icono-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/img/icono-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/img/icono-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
