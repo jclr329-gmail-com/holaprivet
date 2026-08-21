@@ -348,18 +348,28 @@ async def genera_uno(sem, texto, voz, rate, ruta):
         # y entonces empieza a devolver audio VACIO (archivos de 0 bytes).
         await asyncio.sleep(0.25)
 
+        ultimo_error = ''
         for intento in (1, 2, 3, 4):
+            # Plan B para los textos «x. y»: si el punto intermedio no
+            # genera, en el intento 3 se prueba con coma (pausa mas corta,
+            # pero audio al fin y al cabo).
+            enviar = texto
+            if intento >= 3 and '. ' in texto and not texto.endswith('.'):
+                enviar = texto.replace('. ', ', ')
+
             try:
-                await edge_tts.Communicate(texto, voz, rate=rate).save(ruta)
+                await edge_tts.Communicate(enviar, voz, rate=rate).save(ruta)
 
                 # Un mp3 real de una palabra ya pesa varios KB: si pesa menos,
                 # el servicio nos ha frenado y esto no vale.
                 if os.path.getsize(ruta) > 1000:
                     return True
+                peso = os.path.getsize(ruta)
                 os.remove(ruta)
-                raise RuntimeError('respuesta vacia (frenado del servicio)')
+                raise RuntimeError(f'respuesta de {peso} bytes')
 
-            except Exception:
+            except Exception as e:
+                ultimo_error = type(e).__name__ + ': ' + str(e)[:120]
                 try:
                     if os.path.exists(ruta) and os.path.getsize(ruta) == 0:
                         os.remove(ruta)
@@ -370,7 +380,7 @@ async def genera_uno(sem, texto, voz, rate, ruta):
                     voz = RESERVA[voz]      # ultima carta: la voz de reserva
                     continue
                 if intento == 4:
-                    return False
+                    return ultimo_error or False
                 # Esperar de verdad: el frenado se pasa solo en unos segundos
                 await asyncio.sleep(6 * intento)
 
@@ -415,10 +425,10 @@ async def genera_todo(tareas, narraciones, salida, prueba=False,
             genera_uno(sem, t, v, r, ruta) for t, v, r, ruta in lote
         ])
         for (t, v, r, ruta), ok in zip(lote, resultados):
-            if ok:
+            if ok is True:
                 hechos += 1
             else:
-                errores.append((ruta, v, t))
+                errores.append((ruta, v, t + '  [' + (ok or 'sin detalle') + ']'))
         print(f'  {hechos + len(errores)} / {len(pendientes)}')
 
     print(f'\nGenerados: {hechos} · errores: {len(errores)}')

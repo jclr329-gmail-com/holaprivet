@@ -154,7 +154,30 @@ class GestionController extends Controller
 
     public function donaciones()
     {
-        return view('gestion.donaciones');
+        return view('gestion.donaciones', [
+            'totalCents' => (int) \App\Models\Order::where('status', 'pagado')->sum('total_cents'),
+            'ocupadas'   => \App\Models\WallWord::where('status', 'ocupada')->count(),
+            'pendientesModeracion' => \App\Models\WallOwnership::where('moderation', 'pendiente')->count(),
+            'moderacion' => \App\Models\WallOwnership::with(['palabra', 'usuario'])
+                                ->where('moderation', 'pendiente')->get(),
+            'pedidos'    => \App\Models\Order::with(['usuario', 'items.palabra'])
+                                ->orderByDesc('id')->limit(100)->get(),
+        ]);
+    }
+
+    public function moderar(Request $peticion)
+    {
+        $datos = $peticion->validate([
+            'id'       => ['required', 'integer', 'exists:wall_ownerships,id'],
+            'decision' => ['required', 'in:aprobada,rechazada'],
+        ]);
+
+        \App\Models\WallOwnership::findOrFail($datos['id'])->update([
+            'moderation'   => $datos['decision'],
+            'moderated_at' => now(),
+        ]);
+
+        return back()->with('estado', 'Moderado.');
     }
 
     // -------------------------------------------------------- materiales

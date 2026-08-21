@@ -51,9 +51,15 @@ class CursoController extends Controller
     {
         $raiz = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') ?: public_path();
 
-        return view('nosotros', [
-            'hayFoto' => is_file($raiz . '/img/nosotros.png'),
-        ]);
+        $foto = null;
+        foreach (['img/nosotros.jpg', 'img/nosotros.png', 'img/nosotros.webp'] as $ruta) {
+            if (is_file($raiz . '/' . $ruta)) {
+                $foto = '/' . $ruta . '?v=' . (@filemtime($raiz . '/' . $ruta) ?: 1);
+                break;
+            }
+        }
+
+        return view('nosotros', ['foto' => $foto]);
     }
 
     /** La puerta: bienvenida para quien no ha entrado, el camino para quien si. */
