@@ -54,7 +54,19 @@
       @php $correcta = $ej->options->firstWhere('is_correct', true); @endphp
       <li class="ejercicio" value="{{ $ej->position }}"
           data-n="{{ $ej->position }}" data-correcta="{{ $correcta?->letter }}">
-        <p class="ej-enunciado">{{ $ej->prompt }}</p>
+        <p class="ej-enunciado">
+          @if ($ej->prompt_ru)
+            <button type="button" class="ej-num con-glosa" data-glosa
+                    aria-label="показать перевод задания {{ $ej->position }}"
+                    title="Держите, чтобы увидеть перевод">{{ $ej->position }}</button>
+          @else
+            <span class="ej-num">{{ $ej->position }}</span>
+          @endif
+          {{ $ej->prompt }}
+        </p>
+        @if ($ej->prompt_ru)
+          <p class="ej-glosa" hidden>{{ $ej->prompt_ru }}</p>
+        @endif
         <div class="opciones" role="group">
           @foreach ($ej->options as $o)
             <button type="button" class="opcion" data-letra="{{ $o->letter }}">

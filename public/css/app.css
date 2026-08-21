@@ -568,3 +568,25 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
 .chuleta-par span[lang]{font-weight:600; color:var(--tinta)}
 .chuleta-ru{color:var(--gris)}
 @media(max-width:560px){.chuleta-rejilla{grid-template-columns:1fr}}
+
+/* ------------------------------------------------- pulsador de traduccion */
+.ej-lista{list-style:none; padding-left:0}
+.ej-num{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:1.7rem; height:1.7rem; margin-right:.45rem; padding:0 .3rem;
+  font:inherit; font-size:.88rem; font-weight:700; color:var(--gris);
+  background:var(--cal); border:1.5px solid var(--linea); border-radius:8px;
+  vertical-align:baseline;
+}
+button.ej-num.con-glosa{
+  cursor:pointer; color:var(--azul); border-color:var(--azul);
+  border-bottom-width:3px;               /* pinta de tecla pulsable */
+  user-select:none; -webkit-user-select:none; touch-action:manipulation;
+}
+button.ej-num.con-glosa:hover{background:var(--azul-claro)}
+button.ej-num.viendo{background:var(--azul); color:#fff; border-bottom-width:1.5px}
+.ej-glosa{
+  margin:.2rem 0 .5rem 2.15rem; padding:.45rem .8rem;
+  background:var(--azul-claro); border-radius:var(--radio);
+  color:var(--tinta); font-size:.92rem;
+}

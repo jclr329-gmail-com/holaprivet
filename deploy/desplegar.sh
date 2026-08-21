@@ -167,6 +167,9 @@ else
         echo "Ya hay contenido importado."
         echo "Para reimportar, crea el archivo vacio:  private/importar-contenido"
     fi
+    # Las traducciones de enunciados viajan aparte del codigo Y del importador:
+    # si el TSV esta en la carpeta del contenido, se (re)cargan siempre.
+    $PHP artisan ejercicios:traducciones || true
 fi
 
 # --- 9. Optimizacion -------------------------------------------------------

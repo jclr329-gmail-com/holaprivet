@@ -7,6 +7,43 @@
 (function () {
   'use strict';
 
+  /* El pulsador de traduccion: manteniendo pulsado el numero se ve el ruso
+     del enunciado; al soltar, desaparece. Con teclado: mantener Espacio. */
+  document.addEventListener('pointerdown', function (e) {
+    var b = e.target.closest('[data-glosa]');
+    if (!b) return;
+    e.preventDefault();
+    glosa(b, true);
+  });
+  ['pointerup', 'pointercancel'].forEach(function (ev) {
+    document.addEventListener(ev, function () { glosaFuera(); });
+  });
+  document.addEventListener('keydown', function (e) {
+    var b = e.target.closest && e.target.closest('[data-glosa]');
+    if (b && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); glosa(b, true); }
+  });
+  document.addEventListener('keyup', function (e) {
+    if (e.key === ' ' || e.key === 'Enter') glosaFuera();
+  });
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.closest && e.target.closest('[data-glosa]')) e.preventDefault();
+  });
+
+  function glosa(boton, ver) {
+    var li = boton.closest('.ejercicio');
+    var caja = li && li.querySelector('.ej-glosa');
+    if (caja) { caja.hidden = !ver; boton.classList.toggle('viendo', ver); }
+  }
+  function glosaFuera() {
+    document.querySelectorAll('.ej-glosa:not([hidden])').forEach(function (c) {
+      c.hidden = true;
+    });
+    document.querySelectorAll('[data-glosa].viendo').forEach(function (b) {
+      b.classList.remove('viendo');
+    });
+  }
+
+
   var raiz = document.querySelector('[data-ejercicios]');
   if (!raiz) return;
 
