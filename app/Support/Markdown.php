@@ -221,7 +221,7 @@ class Markdown
             $esEspanol = ! preg_match('/\p{Cyrillic}/u', $m[1])
                          && preg_match('/\p{Latin}/u', $m[1]);
             return ($this->audio && $esEspanol)
-                ? '<span class="es">' . $m[1] . '</span>'
+                ? '<span class="es" lang="es" translate="no">' . $m[1] . '</span>'
                 : '<strong>' . $m[1] . '</strong>';
         }, $t);
 
@@ -254,10 +254,10 @@ class Markdown
 
         // Si lleva una acotacion en cursiva, se deja fuera del audio
         if (preg_match('/^(.*?)\s*\*\((.+?)\)\*\s*$/u', $limpio, $m)) {
-            return '<span class="es" data-audio="' . Refs::audio($m[1]) . '">' . e(trim($m[1])) . '</span> <em>(' . e($m[2]) . ')</em>';
+            return '<span class="es" lang="es" translate="no" data-audio="' . Refs::audio($m[1]) . '">' . e(trim($m[1])) . '</span> <em>(' . e($m[2]) . ')</em>';
         }
 
-        return '<span class="es" data-audio="' . Refs::audio($limpio) . '">' . e($limpio) . '</span>';
+        return '<span class="es" lang="es" translate="no" data-audio="' . Refs::audio($limpio) . '">' . e($limpio) . '</span>';
     }
 
     // ----------------------------------------------------------------- util
