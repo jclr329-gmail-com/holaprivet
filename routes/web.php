@@ -3,6 +3,8 @@
 use App\Http\Controllers\AccesoController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\GestionController;
+use App\Http\Controllers\MuroController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\ProgresoController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +17,15 @@ Route::get('/nivel/{n}', [CursoController::class, 'nivel'])->whereNumber('n')->n
 Route::get('/fichas',    [CursoController::class, 'fichas'])->name('fichas');
 Route::get('/recursos',  [CursoController::class, 'recursos'])->name('recursos');
 Route::get('/nosotros',  [CursoController::class, 'nosotros'])->name('nosotros');
+
+// ------------------------------------------------------------------ muro
+Route::get('/muro', [MuroController::class, 'muro'])->name('muro');
+Route::middleware('auth')->group(function () {
+    Route::get('/muro/palabra/{palabra}',  [MuroController::class, 'formulario'])->name('muro.formulario');
+    Route::post('/muro/palabra/{palabra}', [MuroController::class, 'apadrinar'])->name('muro.apadrinar');
+    Route::get('/muro/gracias',            [MuroController::class, 'gracias'])->name('muro.gracias');
+});
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'recibir'])->name('stripe.webhook');
 Route::get('/p/{slug}',  [CursoController::class, 'pieza'])->name('pieza');
 
 // ----------------------------------------------------------------- cuenta
@@ -51,7 +62,7 @@ Route::middleware('auth')->group(function () {
 // -------------------------------------------------------------- gestion
 // Sin enlaces desde la web publica; quien no este en admin_users ve un 404.
 
-Route::middleware(['auth', \App\Http\Middleware\EsAdmin::class])
+Route::middleware([\App\Http\Middleware\EsAdmin::class])
     ->prefix('gestion')->name('gestion.')->group(function () {
         Route::get('/',            [GestionController::class, 'panel'])->name('panel');
         Route::get('/alumnos',     [GestionController::class, 'alumnos'])->name('alumnos');
@@ -61,4 +72,5 @@ Route::middleware(['auth', \App\Http\Middleware\EsAdmin::class])
         Route::get('/materiales',  [GestionController::class, 'materiales'])->name('materiales');
         Route::post('/materiales', [GestionController::class, 'materialGuardar'])->name('materiales.guardar');
         Route::post('/materiales/borrar', [GestionController::class, 'materialBorrar'])->name('materiales.borrar');
+        Route::post('/moderar',    [GestionController::class, 'moderar'])->name('moderar');
     });

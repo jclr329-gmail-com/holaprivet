@@ -9,9 +9,10 @@
     <h2>Кто делает holaprivet</h2>
   </div>
 
-  @if ($hayFoto)
+  <div class="nosotros-texto">
+  @if ($foto)
     <figure class="nosotros-foto">
-      <img src="/img/nosotros.png?v={{ @filemtime((rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') ?: public_path()) . '/img/nosotros.png') ?: 1 }}" alt="Мы">
+      <img src="{{ $foto }}" alt="Мы">
     </figure>
   @endif
 
@@ -24,6 +25,7 @@
   <p>Курс был и останется бесплатным. Мы делаем его, потому что помним, каково
   это — приехать и не понимать ни слова.</p>
   {{-- ===== FIN DE LA ЗАГЛУШКА ===== --}}
+  </div>
 
 </div>
 @endsection

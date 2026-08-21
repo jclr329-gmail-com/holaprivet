@@ -485,5 +485,35 @@ ul.limpia li::before{content:"·"; position:absolute; left:.2rem; color:var(--az
 
 /* ---------------------------------------------------------------- nosotros */
 .ancho.estrecho-medio{max-width:34rem}
-.nosotros-foto{margin:0 0 1.5rem; border-radius:var(--radio); overflow:hidden}
+.nosotros-texto::after{content:""; display:block; clear:both}
+.nosotros-foto{
+  float:left; width:11rem; margin:0 1.3rem .6rem 0;
+  border-radius:var(--radio); overflow:hidden;
+}
 .nosotros-foto img{width:100%; height:auto; display:block}
+@media(max-width:520px){.nosotros-foto{float:none; width:100%; max-width:14rem; margin:0 auto 1.2rem}}
+
+/* ------------------------------------------------------------------- muro */
+.muro{display:flex; flex-wrap:wrap; gap:.55rem; margin:1.4rem 0 .6rem}
+.ladrillo{
+  position:relative; display:flex; flex-direction:column; justify-content:center;
+  min-width:7.2rem; padding:.55rem .8rem .5rem;
+  background:var(--papel); border:1.5px solid var(--linea);
+  border-radius:var(--radio); text-decoration:none;
+}
+.ladrillo .pal{font-family:var(--serif); font-weight:700; color:var(--tinta)}
+.ladrillo .tra{font-size:.78rem; color:var(--gris-suave)}
+.ladrillo .quien{
+  margin-top:.25rem; font-size:.75rem; font-weight:700; color:var(--azul);
+}
+.ladrillo.libre{border-style:dashed}
+.ladrillo.libre:hover{border-color:var(--azul); border-style:solid}
+.ladrillo.libre .pal{color:var(--gris)}
+.ladrillo.reservada{opacity:.5}
+.ladrillo.ocupada{background:var(--cal); border-color:#CBD9E4}
+.ladrillo.especial{
+  border-width:2px; border-color:var(--ambar); min-width:9.5rem;
+}
+.ladrillo.especial .pal{font-size:1.15rem; color:var(--ambar)}
+.ladrillo.ocupada.especial{background:#FBF5EA}
+.muro-pie{color:var(--gris-suave); font-size:.85rem}

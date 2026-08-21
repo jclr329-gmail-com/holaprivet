@@ -22,6 +22,7 @@
       <a href="{{ route('portada') }}" class="{{ request()->is('/') || request()->is('nivel/*') ? 'act' : '' }}">Курс</a>
       <a href="{{ route('fichas') }}"  class="{{ request()->is('fichas') ? 'act' : '' }}">Карточки</a>
       <a href="{{ route('recursos') }}" class="{{ request()->is('recursos') ? 'act' : '' }}">Материалы</a>
+      <a href="{{ route('muro') }}" class="{{ request()->is('muro*') ? 'act' : '' }}">Стена</a>
       <a href="{{ route('nosotros') }}" class="{{ request()->is('nosotros') ? 'act' : '' }}">О нас</a>
       @auth
         <span class="quien-soy" title="{{ auth()->user()->email }}">{{ \Illuminate\Support\Str::before(auth()->user()->name, ' ') }}</span>
