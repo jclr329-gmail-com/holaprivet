@@ -249,6 +249,14 @@ class Importador
                     break;
                 }
 
+                // El parecido por prefijo solo vale para candidatos concretos.
+                // Un candidato generico («ficha», «cuento», «ojo») casaba con
+                // la primera ficha de la lista y todos los «Ficha — …» iban a
+                // parar a ficha-acentos.
+                if (! str_contains($c, '-') || in_array($c, self::GENERICOS, true)) {
+                    continue;
+                }
+
                 $parecido = $mapa->keys()->first(
                     fn ($s) => str_starts_with($s, $c) || str_starts_with($c, $s)
                 );
@@ -276,6 +284,9 @@ class Importador
         }
     }
 
+    /** Palabras que por si solas no identifican ninguna pieza. */
+    protected const GENERICOS = ['ficha', 'cuento', 'ojo', 'modulo', 'fichas', 'cuentos'];
+
     /** @return array<int,string> posibles slugs, del mas probable al menos */
     protected function candidatos(string $bruto): array
     {
@@ -293,7 +304,9 @@ class Importador
 
         if ($der !== '') {
             $salida[] = 'ficha-' . $this->slug($der);
-            $salida[] = 'ficha-' . $this->sinParticulas($this->slug($der));
+            // Sobre la cadena entera: asi cae tambien la particula inicial
+            // («Ficha — los numeros» -> ficha-numeros).
+            $salida[] = $this->sinParticulas('ficha-' . $this->slug($der));
             $salida[] = $this->slug($der);
             $salida[] = 'cuento-' . $this->slug($der);
         }
@@ -338,7 +351,8 @@ class Importador
     /** @return array<int,string> palabras con peso, sin particulas */
     protected function palabras(string $s): array
     {
-        $s = mb_strtolower($s);
+        // Sin acentos, como los slugs: «números» debe casar con «numeros».
+        $s = mb_strtolower(Str::ascii($s));
         $trozos = preg_split('/[^\p{L}\p{N}]+/u', $s, -1, PREG_SPLIT_NO_EMPTY);
         $vacias = ['de', 'del', 'la', 'las', 'los', 'el', 'e', 'y', 'para', 'ficha', 'cuento', 'ojo'];
 
