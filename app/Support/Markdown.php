@@ -110,12 +110,25 @@ class Markdown
         $primera   = true;
         $hayCabecera = isset($filas[1]) && $this->esSeparador($filas[1]);
 
+        // Cabecera enteramente vacia («| | |»): la tabla va sin cabecera,
+        // igual que en los documentos Word.
+        $cabeceraVacia = $hayCabecera
+            && ! array_filter($filas[0], fn ($c) => trim($c) !== '');
+
+        // Todas las filas al ancho de la mas ancha: sin descuadres.
+        $ancho = max(array_map('count', $filas));
+
         foreach ($filas as $k => $celdas) {
             if ($k === 1 && $hayCabecera) {
                 continue;
             }
+            if ($k === 0 && $cabeceraVacia) {
+                continue;
+            }
 
-            $etiqueta = ($primera && $hayCabecera) ? 'th' : 'td';
+            $celdas = array_pad($celdas, $ancho, '');
+
+            $etiqueta = ($primera && $hayCabecera && ! $cabeceraVacia) ? 'th' : 'td';
             $html .= '<tr>';
 
             foreach ($celdas as $c => $celda) {
@@ -268,7 +281,15 @@ class Markdown
 
     protected function celdas(string $linea): array
     {
-        return array_map('trim', explode('|', trim($linea, "| \t")));
+        // Solo se quita UN pipe por extremo: trim con el juego "| \t" se
+        // comia tambien la primera celda cuando estaba VACIA («| | pensar |»)
+        // y toda la fila cuando lo estaban todas («| | |»), descuadrando
+        // las columnas.
+        $t = trim($linea);
+        $t = preg_replace('/^\|/', '', $t);
+        $t = preg_replace('/\|$/', '', rtrim($t));
+
+        return array_map('trim', explode('|', $t));
     }
 
     protected function esSeparador(array $celdas): bool
