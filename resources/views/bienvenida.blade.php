@@ -1,5 +1,6 @@
 @extends('layout')
-@section('titulo', 'Испанский для жизни в Испании')
+@section('titulo', 'Испанский для жизни в Испании: что это за курс')
+@section('descripcion', "Как устроен holaprivet: три уровня, {$modulos} модулей и {$cuentos} рассказов с аудио, объяснения по-русски и упражнения с мгновенной проверкой. Бесплатно, без рекламы.")
 
 @section('cuerpo')
 <div class="ancho">

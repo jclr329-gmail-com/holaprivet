@@ -1,5 +1,6 @@
 @extends('layout')
-@section('titulo', 'Курс испанского')
+@section('titulo', 'Бесплатный курс испанского для русскоговорящих')
+@section('descripcion', "Бесплатный курс испанского для русскоговорящих: {$modulos} модулей, {$cuentos} рассказов, {$fichas} карточек, " . number_format($ejercicios, 0, ',', ' ') . " упражнений. Объяснения по-русски, аудио, сцены из жизни в Испании.")
 
 @section('cuerpo')
 <div class="ancho">

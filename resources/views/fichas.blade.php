@@ -1,5 +1,6 @@
 @extends('layout')
-@section('titulo', 'Карточки')
+@section('titulo', 'Карточки по испанской грамматике для русскоговорящих')
+@section('descripcion', 'Ir и venir, ser и estar, por и para, saber и conocer, ложные друзья, артикль: слова, которые русский объединяет, а испанский разделяет. И карточки для печати.')
 
 @section('cuerpo')
 <div class="ancho">

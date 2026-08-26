@@ -1,5 +1,10 @@
 @extends('layout')
-@section('titulo', $pieza->title_es)
+@section('titulo', \App\Support\Seo::tituloPieza($pieza))
+@section('descripcion', $descripcion)
+@section('og_tipo', 'article')
+@if ($ilustracion)
+  @section('imagen', $ilustracion)
+@endif
 
 @section('cuerpo')
 <div class="envoltura">
@@ -33,23 +38,14 @@
     <h1>{{ $pieza->title_es }}</h1>
     <p class="h1-ru">{{ $pieza->title_ru }}</p>
 
-    {{-- La ilustracion vive en img/piezas/<slug>.webp, en la raiz del
-         subdominio y fuera del repositorio (como el audio). Si el archivo
-         todavia no existe, no se pinta nada: la web funciona igual con las
-         piezas ilustradas a medias. --}}
-    @php
-      // La imagen vive en la raiz REAL del subdominio (donde el despliegue
-      // copia public/ y donde se sube img/), no en app/public: en este
-      // hosting son carpetas distintas. DOCUMENT_ROOT es la que se sirve.
-      $ilustracion = 'img/piezas/' . $pieza->slug . '.webp';
-      $raiz = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') ?: public_path();
-      $fisica = $raiz . '/' . $ilustracion;
-      $hayIlustracion = is_file($fisica);
-    @endphp
-    @if ($hayIlustracion)
+    {{-- La ilustracion la busca el controlador en img/piezas/<slug>.webp
+         (fuera del repositorio, como el audio). Si el archivo todavia no
+         existe, no se pinta nada: la web funciona igual con las piezas
+         ilustradas a medias. --}}
+    @if ($ilustracion)
       <figure class="ilustracion {{ $pieza->type === 'cuento' ? 'alta' : '' }}">
-        <img src="/{{ $ilustracion }}?v={{ @filemtime($fisica) ?: 1 }}"
-             alt="" loading="lazy" decoding="async">
+        <img src="{{ $ilustracion }}"
+             alt="{{ $pieza->title_es }} — {{ $pieza->title_ru }}" loading="lazy" decoding="async">
       </figure>
     @endif
 

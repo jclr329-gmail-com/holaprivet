@@ -1,5 +1,6 @@
 @extends('layout')
-@section('titulo', 'О нас')
+@section('titulo', 'О нас: кто делает holaprivet')
+@section('descripcion', 'История курса holaprivet: испанец из Малаги, его жена, которая учит испанский, и курс, который вырос из их разговоров. Почему он бесплатный и для кого.')
 
 @section('cuerpo')
 <div class="ancho estrecho-medio">

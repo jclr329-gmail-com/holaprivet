@@ -47,4 +47,16 @@ El registro queda en `despliegue.log`.
 | | |
 |---|---|
 | Pruebas | https://beta.holaprivet.com |
-| Producción | https://holaprivet.com *(pendiente)* |
+| Producción | https://holaprivet.com |
+
+## Buscadores
+
+- La beta lleva `noindex` y un `robots.txt` cerrado; producción se indexa.
+- Cada vista define sus secciones `titulo`, `descripcion`, `imagen` y
+  `robots`; lo que no defina cae a `App\Support\Seo`. Las descripciones de
+  las piezas salen de su propio texto (primer parrafo util).
+- `/sitemap.xml` lo genera `SitemapController` desde la base de datos.
+- La tarjeta de enlace (Telegram, WhatsApp) usa la ilustracion de la pieza
+  si existe en `img/piezas/`; si no, `public/img/og-holaprivet.png`.
+- Los archivos de verificacion de Search Console y Yandex se suben a mano a
+  la raiz del subdominio, fuera del repositorio.

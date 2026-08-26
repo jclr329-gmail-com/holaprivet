@@ -19,6 +19,7 @@ Route::get('/fichas',    [CursoController::class, 'fichas'])->name('fichas');
 Route::get('/recursos',  [CursoController::class, 'recursos'])->name('recursos');
 Route::get('/nosotros',  [CursoController::class, 'nosotros'])->name('nosotros');
 Route::get('/offline/manifiesto', [\App\Http\Controllers\OfflineController::class, 'manifiesto'])->name('offline.manifiesto');
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'xml'])->name('sitemap');
 
 // ------------------------------------------------------------------ muro
 Route::get('/muro', [MuroController::class, 'muro'])->name('muro');

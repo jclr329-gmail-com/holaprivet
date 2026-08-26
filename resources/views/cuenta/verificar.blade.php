@@ -1,4 +1,5 @@
 @extends('layout')
+@section('robots', 'noindex, nofollow')
 @section('titulo', 'Подтвердите почту')
 
 @section('cuerpo')

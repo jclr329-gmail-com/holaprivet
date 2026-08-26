@@ -1,11 +1,47 @@
+@php
+  // Lo que leen los buscadores y los mensajeros. Cada vista puede definir
+  // sus secciones «titulo», «descripcion», «imagen» y «robots»; lo que no
+  // defina cae a los valores por defecto de App\Support\Seo. Las secciones
+  // llegan ya escapadas por Blade, por eso abajo se imprimen con {!! !!}.
+  $esBeta      = str_contains(config('app.url'), '//beta.');
+  $casa        = rtrim(config('app.url'), '/');
+  $seoTitulo   = trim($__env->yieldContent('titulo', 'holaprivet')) . ' · holaprivet';
+  $seoTexto    = trim($__env->yieldContent('descripcion', \App\Support\Seo::DESCRIPCION));
+  $seoImagen   = trim($__env->yieldContent('imagen', \App\Support\Seo::IMAGEN));
+  $seoRobots   = trim($__env->yieldContent('robots', ''));
+  $seoTipo     = trim($__env->yieldContent('og_tipo', 'website'));
+  $ruta        = request()->getPathInfo();
+  $seoCanonica = $casa . ($ruta === '/curso' ? '/' : $ruta);   // /curso es la portada
+  $seoImagen   = str_starts_with($seoImagen, 'http') ? $seoImagen : $casa . $seoImagen;
+@endphp
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-@if (str_contains(config('app.url'), '//beta.'))
+@if ($esBeta)
 <meta name="robots" content="noindex, nofollow">
+@elseif ($seoRobots !== '')
+<meta name="robots" content="{!! $seoRobots !!}">
+@else
+<link rel="canonical" href="{{ $seoCanonica }}">
 @endif
+<meta name="description" content="{!! $seoTexto !!}">
+<meta property="og:site_name" content="holaprivet">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:type" content="{!! $seoTipo !!}">
+<meta property="og:title" content="{!! $seoTitulo !!}">
+<meta property="og:description" content="{!! $seoTexto !!}">
+<meta property="og:url" content="{{ $seoCanonica }}">
+<meta property="og:image" content="{{ $seoImagen }}">
+@if ($seoImagen === $casa . \App\Support\Seo::IMAGEN)
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+@endif
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{!! $seoTitulo !!}">
+<meta name="twitter:description" content="{!! $seoTexto !!}">
+<meta name="twitter:image" content="{{ $seoImagen }}">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#1F5C8B">
 <link rel="apple-touch-icon" href="/img/icono-192.png">
@@ -13,7 +49,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="holaprivet">
 <meta name="csrf" content="{{ csrf_token() }}">
-<title>@yield('titulo', 'holaprivet') · holaprivet</title>
+<title>{!! $seoTitulo !!}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -60,7 +96,7 @@
 <footer class="pie-web">
   <div>
     <span>holaprivet · Испанский для русскоговорящих</span>
-    <span>Бета-версия</span>
+    @if ($esBeta)<span>Бета-версия</span>@endif
   </div>
 </footer>
 
