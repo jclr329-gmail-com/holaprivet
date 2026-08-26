@@ -1,6 +1,6 @@
 #!/bin/bash
 # ===========================================================================
-#  holaprivet.com - script de despliegue  (v18)
+#  holaprivet.com - script de despliegue  (v19)
 #
 #  Particularidades de este hosting que condicionan el script:
 #    - proc_open esta desactivado  -> Composer no puede ejecutar scripts
@@ -27,7 +27,7 @@ COMPOSER="$PHP -d memory_limit=-1 $TOOLS/composer.phar"
 
 exec > "$LOG" 2>&1
 echo "==========================================================="
-echo " DESPLIEGUE v18 ($ENTORNO)   $(date)"
+echo " DESPLIEGUE v19 ($ENTORNO)   $(date)"
 echo "==========================================================="
 
 paso ()  { echo; echo "----- $1 -----"; }
@@ -188,8 +188,9 @@ cp -rf "$APP/public/." "$SUB/" || morir "no se pudo publicar la carpeta public"
 cp -f  "$APP/deploy/htaccess" "$SUB/.htaccess" || morir "no se pudo copiar el .htaccess"
 rm -f "$SUB/index.html"
 # La beta no se indexa; produccion si (el archivo del repo trae el cierre).
+# El mapa del sitio lo sirve la aplicacion desde la base de datos.
 if [ "$ENTORNO" = "produccion" ]; then
-    printf 'User-agent: *\nAllow: /\n' > "$SUB/robots.txt"
+    printf 'User-agent: *\nAllow: /\n\nSitemap: https://holaprivet.com/sitemap.xml\n' > "$SUB/robots.txt"
 fi
 echo "Publicado:"
 ls -la "$SUB" | grep -E 'index.php|htaccess|robots|css'

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Exercise;
 use App\Models\Piece;
 use App\Support\Markdown;
+use App\Support\Seo;
 
 class CursoController extends Controller
 {
@@ -191,7 +192,18 @@ class CursoController extends Controller
         $siguiente = $this->siguiente($pieza);
         $repasos   = $interactivo ? $this->repasos($pieza) : collect();
 
-        return view('pieza', compact('pieza', 'secciones', 'siguiente', 'interactivo', 'repasos'));
+        // La ilustracion vive en img/piezas/<slug>.webp, en la raiz REAL del
+        // subdominio y fuera del repositorio (como el audio). Se comprueba
+        // aqui, y no en la vista, porque tambien es la imagen de la tarjeta
+        // de enlace (Open Graph), que va en la cabecera.
+        $raiz   = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') ?: public_path();
+        $fisica = $raiz . '/img/piezas/' . $pieza->slug . '.webp';
+        $ilustracion = is_file($fisica)
+            ? '/img/piezas/' . $pieza->slug . '.webp?v=' . (@filemtime($fisica) ?: 1)
+            : null;
+
+        return view('pieza', compact('pieza', 'secciones', 'siguiente', 'interactivo', 'repasos', 'ilustracion')
+            + ['descripcion' => Seo::descripcionPieza($pieza)]);
     }
 
     /**
