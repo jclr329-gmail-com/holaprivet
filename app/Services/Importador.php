@@ -330,22 +330,73 @@ class Importador
     protected function porPalabras(string $bruto, \Illuminate\Support\Collection $mapa): ?int
     {
         $palabras = $this->palabras($bruto);
-        if (count($palabras) < 2) {
+        if (count($palabras) < 1) {
             return null;
         }
 
-        foreach ($mapa as $slug => $id) {
-            $delSlug = $this->palabras($slug);
-            if (count($delSlug) < 2) {
-                continue;
-            }
-            $comunes = array_intersect($palabras, $delSlug);
-            if (count($comunes) === count($palabras) || count($comunes) === count($delSlug)) {
-                return $id;
+        // Si el enlace dice de que familia es («Ficha — …», «Cuento …»), solo
+        // se buscan piezas de esa familia. Dentro de ella basta con que
+        // coincidan las palabras del slug, aunque sea una sola
+        // («Ficha — el acento y la tilde: …» -> ficha-acentos).
+        $familia = null;
+        foreach (['ficha', 'cuento', 'ojo'] as $f) {
+            if (str_starts_with(mb_strtolower(Str::ascii($bruto)), $f)) {
+                $familia = $f . '-';
+                break;
             }
         }
 
-        return null;
+        $mejor      = null;   // dentro de una familia: el que mas palabras comparte
+        $mejorNota  = 0;
+        $empate     = false;
+
+        foreach ($mapa as $slug => $id) {
+            if ($familia && ! str_starts_with($slug, $familia)) {
+                continue;
+            }
+            $delSlug = $this->palabras($slug);
+            $minimo  = $familia ? 1 : 2;
+            if (count($delSlug) < $minimo || count($palabras) < $minimo) {
+                continue;
+            }
+            $comunes = $this->comunes($palabras, $delSlug);
+            if ($comunes === count($palabras) || $comunes === count($delSlug)) {
+                return $id;
+            }
+            if ($familia && $comunes > 0) {
+                if ($comunes > $mejorNota) {
+                    $mejor = $id; $mejorNota = $comunes; $empate = false;
+                } elseif ($comunes === $mejorNota) {
+                    $empate = true;
+                }
+            }
+        }
+
+        // «Ficha — irregulares por familias» -> ficha-verbos-irregulares:
+        // ninguna lista contiene a la otra, pero solo una ficha comparte algo.
+        return ($mejor && ! $empate) ? $mejor : null;
+    }
+
+    /**
+     * Palabras que casan entre dos listas. Dos palabras casan si son iguales
+     * o si una empieza por la otra con al menos cinco letras en comun
+     * («acento» / «acentos», «numero» / «numeros»).
+     */
+    protected function comunes(array $a, array $b): int
+    {
+        $n = 0;
+        foreach ($a as $x) {
+            foreach ($b as $y) {
+                if ($x === $y
+                    || (mb_strlen($x) >= 5 && mb_strlen($y) >= 5
+                        && (str_starts_with($x, $y) || str_starts_with($y, $x)))) {
+                    $n++;
+                    break;
+                }
+            }
+        }
+
+        return $n;
     }
 
     /** @return array<int,string> palabras con peso, sin particulas */
